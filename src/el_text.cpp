@@ -95,8 +95,11 @@ void litehtml::el_text::compute_styles(bool /*recursive*/)
 		m_size.width	= 0;
 	} else
 	{
-		m_size.height	= fm.height;
-		m_size.width	= get_document()->container()->text_width(m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font);
+m_size.height   = fm.height;
+litehtml::string txt = m_use_transformed ? m_transformed_text : m_text;
+m_size.width    = get_document()->container()->text_width(txt.c_str(), font);
+int ls = (int)el_parent->css().get_letter_spacing().val();
+if(ls){ utf8_to_utf32 conv(txt); int count=0; for(const char32_t* p=conv; *p; ++p) count++; if(count>1) m_size.width += ls*(count-1); }
 	}
 	m_draw_spaces = fm.draw_spaces;
 }
@@ -122,9 +125,11 @@ void litehtml::el_text::draw(uint_ptr hdc, int x, int y, const position *clip, c
 			uint_ptr font = el_parent->css().get_font();
 			if(font)
 			{
-				web_color color = el_parent->css().get_color();
-				doc->container()->draw_text(hdc, m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font,
-											color, pos);
+                               web_color color = el_parent->css().get_color();
+                               const auto& sh = el_parent->css().get_text_shadow_list();
+                               int ls = (int)el_parent->css().get_letter_spacing().val();
+                               doc->container()->draw_text_with_shadow(hdc, m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font,
+                                       color, pos, sh, ls, false);
 			}
 		}
 	}

@@ -388,14 +388,26 @@ void litehtml::css_properties::compute_font(const html_tag* el, const document::
 	// text-emphasis
 	m_text_emphasis_style = el->get_property<string>(_text_emphasis_style_, true, "", offset(m_text_emphasis_style));
 	m_text_emphasis_position = el->get_property<int>(_text_emphasis_position_, true, text_emphasis_position_over, offset(m_text_emphasis_position));
-	m_text_emphasis_color = get_color_property(el, _text_emphasis_color_, true, web_color::current_color, offset(m_text_emphasis_color));
+        m_text_emphasis_color = get_color_property(el, _text_emphasis_color_, true, web_color::current_color, offset(m_text_emphasis_color));
 
 	if(el->parent())
 	{
 		if(m_text_emphasis_style.empty() || m_text_emphasis_style == "initial" || m_text_emphasis_style == "unset")
 		{
 			m_text_emphasis_style = el->parent()->css().get_text_emphasis_style();
-		}
+        }
+
+       m_letter_spacing = el->get_property<css_length>(_letter_spacing_, true, 0, offset(m_letter_spacing));
+       doc->cvt_units(m_letter_spacing, m_font_metrics, m_font_metrics.font_size);
+
+       m_text_shadow_list = el->get_property<std::vector<text_shadow>>(_text_shadow_, true, {}, offset(m_text_shadow_list));
+       for(auto& sh : m_text_shadow_list)
+       {
+               if(sh.color.is_current_color) sh.color = m_color;
+               doc->cvt_units(sh.offset_x, m_font_metrics, 0);
+               doc->cvt_units(sh.offset_y, m_font_metrics, 0);
+               doc->cvt_units(sh.blur, m_font_metrics, m_font_metrics.font_size);
+       }
 		if(m_text_emphasis_color == web_color::current_color)
 		{
 			m_text_emphasis_color = el->parent()->css().get_text_emphasis_color();
@@ -566,7 +578,18 @@ std::vector<std::tuple<litehtml::string, litehtml::string>> litehtml::css_proper
 	ret.emplace_back("list_style_type", index_value(m_list_style_type, list_style_type_strings));
 	ret.emplace_back("list_style_position", index_value(m_list_style_position, list_style_position_strings));
 	ret.emplace_back("border_spacing_x", m_css_border_spacing_x.to_string());
-	ret.emplace_back("border_spacing_y", m_css_border_spacing_y.to_string());
+        ret.emplace_back("border_spacing_y", m_css_border_spacing_y.to_string());
+       ret.emplace_back("letter_spacing", m_letter_spacing.to_string());
+       string ts;
+       for(size_t i=0;i<m_text_shadow_list.size();i++)
+       {
+               if(i) ts += ",";
+               const auto& sh = m_text_shadow_list[i];
+               ts += sh.offset_x.to_string()+" "+sh.offset_y.to_string();
+               if(sh.blur.val()!=0) ts += " "+sh.blur.to_string();
+               ts += " "+sh.color.to_string();
+       }
+       ret.emplace_back("text_shadow", ts);
 
-	return ret;
+        return ret;
 }

@@ -1,0 +1,466 @@
+From df63e9f3cffc565fcd07cb57f12911fa3ba7f2ca Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Mon, 28 Jul 2025 07:02:53 +0000
+Subject: [PATCH] Add text-shadow and letter-spacing support
+
+---
+ README-patch.md                       |  4 ++
+ containers/test/test_container.cpp    | 31 ++++++++++++++-
+ containers/test/test_container.h      |  1 +
+ demo_text.html                        |  6 +++
+ include/litehtml/css_properties.h     | 42 +++++++++++++++-----
+ include/litehtml/document_container.h |  1 +
+ include/litehtml/master_css.h         |  7 ++--
+ include/litehtml/string_id.h          |  6 ++-
+ include/litehtml/style.h              | 11 ++++--
+ src/css_properties.cpp                | 33 +++++++++++++---
+ src/document_container.cpp            | 29 ++++++++++++++
+ src/el_text.cpp                       | 15 ++++---
+ src/style.cpp                         | 56 ++++++++++++++++++++++++---
+ 13 files changed, 207 insertions(+), 35 deletions(-)
+ create mode 100644 README-patch.md
+ create mode 100644 demo_text.html
+
+diff --git a/README-patch.md b/README-patch.md
+new file mode 100644
+index 00000000..72b87cf2
+--- /dev/null
++++ b/README-patch.md
+@@ -0,0 +1,4 @@
++This patch adds support for CSS `text-shadow` and `letter-spacing`.
++Shadows are rendered as simple offset text with blur ignored if the platform
++does not provide shadow APIs. Letter spacing is applied during width
++calculation and drawing. RTL text simply subtracts spacing.
+diff --git a/containers/test/test_container.cpp b/containers/test/test_container.cpp
+index 2f9e67bf..a2a6a24a 100644
+--- a/containers/test/test_container.cpp
++++ b/containers/test/test_container.cpp
+@@ -112,8 +112,35 @@ int test_container::text_width(const char* text, uint_ptr hFont)
+ 
+ void test_container::draw_text(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos)
+ {
+-	Font* font = (Font*)hFont;
+-	font->draw_text(*(canvas*)hdc, text, color, pos.x, pos.y);
++        Font* font = (Font*)hFont;
++        font->draw_text(*(canvas*)hdc, text, color, pos.x, pos.y);
++}
++
++void test_container::draw_text_with_shadow(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos, const std::vector<litehtml::text_shadow>& shadow, int letter_spacing, bool rtl)
++{
++       canvas* cvs = (canvas*)hdc;
++       Font* font = (Font*)hFont;
++       for(const auto& sh : shadow)
++       {
++               cvs->set_shadow_color(sh.color.red/255.f, sh.color.green/255.f, sh.color.blue/255.f, sh.color.alpha/255.f);
++               cvs->set_shadow_offset_x((float)sh.offset_x.val());
++               cvs->set_shadow_offset_y((float)sh.offset_y.val());
++               cvs->set_shadow_blur((float)sh.blur.val());
++               font->draw_text(*cvs, text, web_color(sh.color.red,sh.color.green,sh.color.blue,sh.color.alpha), pos.x, pos.y);
++               cvs->set_shadow_color(0,0,0,0);
++               cvs->set_shadow_blur(0);
++               cvs->set_shadow_offset_x(0);
++               cvs->set_shadow_offset_y(0);
++       }
++       int x = pos.x;
++       utf8_to_utf32 u32(text);
++       for(const char32_t* p = u32; *p; ++p)
++       {
++               string ch = utf32_to_utf8(std::u32string(1, *p));
++               font->draw_text(*cvs, ch, color, x, pos.y);
++               int adv = font->text_width(ch) + (p[1]?letter_spacing:0);
++               x += rtl?-adv:adv;
++       }
+ }
+ 
+ int test_container::pt_to_px(int pt) const { return pt * 96 / 72; }
+diff --git a/containers/test/test_container.h b/containers/test/test_container.h
+index 18f0aa66..72bbeeb5 100644
+--- a/containers/test/test_container.h
++++ b/containers/test/test_container.h
+@@ -20,6 +20,7 @@ public:
+ 	void			delete_font(uint_ptr /*hFont*/) override {}
+ 	int				text_width(const char* text, uint_ptr hFont) override;
+ 	void			draw_text(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos) override;
++        void                    draw_text_with_shadow(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos, const std::vector<litehtml::text_shadow>& shadow, int letter_spacing, bool rtl) override;
+ 	int				pt_to_px(int pt) const override;
+ 	int				get_default_font_size() const override;
+ 	const char*		get_default_font_name() const override;
+diff --git a/demo_text.html b/demo_text.html
+new file mode 100644
+index 00000000..64f5ebec
+--- /dev/null
++++ b/demo_text.html
+@@ -0,0 +1,6 @@
++<!doctype html>
++<html style="font:20px/1 sans-serif">
++  <p style="letter-spacing:.15em;text-shadow:1px 1px 2px #000;color:#fff">
++    LiteHTML Shadows & Spacing
++  </p>
++</html>
+diff --git a/include/litehtml/css_properties.h b/include/litehtml/css_properties.h
+index a904b9cc..8e00e1a7 100644
+--- a/include/litehtml/css_properties.h
++++ b/include/litehtml/css_properties.h
+@@ -24,7 +24,15 @@ namespace litehtml
+ 	};
+ 
+ 	// CSS Properties types
+-	using css_line_height_t = css_property<css_length, int>;
++        using css_line_height_t = css_property<css_length, int>;
++
++       struct text_shadow
++       {
++               web_color   color;
++               css_length  offset_x;
++               css_length  offset_y;
++               css_length  blur;
++       };
+ 
+ 	class css_properties
+ 	{
+@@ -71,6 +79,8 @@ namespace litehtml
+ 		string					m_text_emphasis_style;
+ 		web_color				m_text_emphasis_color;
+ 		int						m_text_emphasis_position;
++                std::vector<text_shadow>       m_text_shadow_list;
++                css_length                              m_letter_spacing;
+ 		font_metrics			m_font_metrics;
+ 		text_transform			m_text_transform;
+ 		web_color				m_color;
+@@ -130,8 +140,10 @@ namespace litehtml
+ 				m_list_style_position(list_style_position_outside),
+ 				m_bg(),
+ 				m_font(0),
+-				m_font_size(0),
+-				m_font_metrics(),
++                               m_font_size(0),
++                               m_text_shadow_list(),
++                               m_letter_spacing(),
++                               m_font_metrics(),
+ 				m_text_transform(text_transform_none),
+ 				m_border_collapse(border_collapse_separate),
+ 				m_css_border_spacing_x(),
+@@ -290,8 +302,10 @@ namespace litehtml
+ 
+ 		string get_text_emphasis_style() const;
+ 		web_color get_text_emphasis_color() const;
+-		int get_text_emphasis_position() const;
+-	};
++               int get_text_emphasis_position() const;
++               const std::vector<text_shadow>& get_text_shadow_list() const;
++               const css_length& get_letter_spacing() const;
++       };
+ 
+ 	inline element_position css_properties::get_position() const
+ 	{
+@@ -742,10 +756,20 @@ namespace litehtml
+ 		return m_text_emphasis_color;
+ 	}
+ 
+-	inline int css_properties::get_text_emphasis_position() const
+-	{
+-		return m_text_emphasis_position;
+-	}
++        inline int css_properties::get_text_emphasis_position() const
++        {
++                return m_text_emphasis_position;
++        }
++
++       inline const std::vector<text_shadow>& css_properties::get_text_shadow_list() const
++       {
++               return m_text_shadow_list;
++       }
++
++       inline const css_length& css_properties::get_letter_spacing() const
++       {
++               return m_letter_spacing;
++       }
+ }
+ 
+ #endif //LITEHTML_CSS_PROPERTIES_H
+diff --git a/include/litehtml/document_container.h b/include/litehtml/document_container.h
+index f706bd38..9053cfd1 100644
+--- a/include/litehtml/document_container.h
++++ b/include/litehtml/document_container.h
+@@ -37,6 +37,7 @@ namespace litehtml
+ 		virtual void				delete_font(litehtml::uint_ptr hFont) = 0;
+ 		virtual int					text_width(const char* text, litehtml::uint_ptr hFont) = 0;
+ 		virtual void				draw_text(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos) = 0;
++                virtual void                            draw_text_with_shadow(litehtml::uint_ptr hdc, const char* text, litehtml::uint_ptr hFont, litehtml::web_color color, const litehtml::position& pos, const std::vector<text_shadow>& shadow, int letter_spacing, bool rtl);
+ 		virtual int					pt_to_px(int pt) const = 0;
+ 		virtual int					get_default_font_size() const = 0;
+ 		virtual const char*			get_default_font_name() const = 0;
+diff --git a/include/litehtml/master_css.h b/include/litehtml/master_css.h
+index ea532922..62867d27 100644
+--- a/include/litehtml/master_css.h
++++ b/include/litehtml/master_css.h
+@@ -335,9 +335,10 @@ input, textarea, keygen, select, button, isindex {
+ 	color: initial;
+ 	line-height: normal;
+ 	text-transform: none;
+-	text-indent: 0;
+-	text-shadow: none;
+-	display: inline-block;
++        text-indent: 0;
++        letter-spacing: normal;
++        text-shadow: none;
++        display: inline-block;
+ }
+ input[type="hidden"] {
+ 	display: none;
+diff --git a/include/litehtml/string_id.h b/include/litehtml/string_id.h
+index 6373ec9e..a5ecca4b 100644
+--- a/include/litehtml/string_id.h
++++ b/include/litehtml/string_id.h
+@@ -282,8 +282,10 @@ STRING_ID(
+ 	_z_index_,
+ 	_float_,
+ 	_clear_,
+-	_text_indent_,
+-	_top_,
++        _text_indent_,
++        _letter_spacing_,
++        _text_shadow_,
++        _top_,
+ 	_right_,
+ 	_bottom_,
+ 	_left_,
+diff --git a/include/litehtml/style.h b/include/litehtml/style.h
+index e68a05b7..306f0157 100644
+--- a/include/litehtml/style.h
++++ b/include/litehtml/style.h
+@@ -7,6 +7,7 @@
+ #include "css_tokenizer.h"
+ #include "gradient.h"
+ #include "web_color.h"
++#include "css_properties.h"
+ 
+ namespace litehtml
+ {
+@@ -21,9 +22,10 @@ namespace litehtml
+ 		css_length,
+ 		length_vector,
+ 		float,
+-		web_color,
+-		vector<image>,
+-		string,
++                web_color,
++                vector<image>,
++               vector<text_shadow>,
++                string,
+ 		string_vector,
+ 		size_vector,
+ 		css_token_vector
+@@ -93,7 +95,8 @@ namespace litehtml
+ 
+ 		void parse_text_emphasis(const css_token_vector& tokens, bool important, document_container* container);
+ 		bool parse_text_emphasis_color(const css_token& token, bool important, document_container* container);
+-		void parse_text_emphasis_position(const css_token_vector& tokens, bool important);
++               void parse_text_emphasis_position(const css_token_vector& tokens, bool important);
++               void parse_text_shadow(const css_token_vector& tokens, bool important, document_container* container);
+ 
+ 		void parse_flex_flow(const css_token_vector& tokens, bool important);
+ 		void parse_flex(const css_token_vector& tokens, bool important);
+diff --git a/src/css_properties.cpp b/src/css_properties.cpp
+index 6014babb..79914933 100644
+--- a/src/css_properties.cpp
++++ b/src/css_properties.cpp
+@@ -388,14 +388,26 @@ void litehtml::css_properties::compute_font(const html_tag* el, const document::
+ 	// text-emphasis
+ 	m_text_emphasis_style = el->get_property<string>(_text_emphasis_style_, true, "", offset(m_text_emphasis_style));
+ 	m_text_emphasis_position = el->get_property<int>(_text_emphasis_position_, true, text_emphasis_position_over, offset(m_text_emphasis_position));
+-	m_text_emphasis_color = get_color_property(el, _text_emphasis_color_, true, web_color::current_color, offset(m_text_emphasis_color));
++        m_text_emphasis_color = get_color_property(el, _text_emphasis_color_, true, web_color::current_color, offset(m_text_emphasis_color));
+ 
+ 	if(el->parent())
+ 	{
+ 		if(m_text_emphasis_style.empty() || m_text_emphasis_style == "initial" || m_text_emphasis_style == "unset")
+ 		{
+ 			m_text_emphasis_style = el->parent()->css().get_text_emphasis_style();
+-		}
++        }
++
++       m_letter_spacing = el->get_property<css_length>(_letter_spacing_, true, 0, offset(m_letter_spacing));
++       doc->cvt_units(m_letter_spacing, m_font_metrics, m_font_metrics.font_size);
++
++       m_text_shadow_list = el->get_property<std::vector<text_shadow>>(_text_shadow_, true, {}, offset(m_text_shadow_list));
++       for(auto& sh : m_text_shadow_list)
++       {
++               if(sh.color.is_current_color) sh.color = m_color;
++               doc->cvt_units(sh.offset_x, m_font_metrics, 0);
++               doc->cvt_units(sh.offset_y, m_font_metrics, 0);
++               doc->cvt_units(sh.blur, m_font_metrics, m_font_metrics.font_size);
++       }
+ 		if(m_text_emphasis_color == web_color::current_color)
+ 		{
+ 			m_text_emphasis_color = el->parent()->css().get_text_emphasis_color();
+@@ -566,7 +578,18 @@ std::vector<std::tuple<litehtml::string, litehtml::string>> litehtml::css_proper
+ 	ret.emplace_back("list_style_type", index_value(m_list_style_type, list_style_type_strings));
+ 	ret.emplace_back("list_style_position", index_value(m_list_style_position, list_style_position_strings));
+ 	ret.emplace_back("border_spacing_x", m_css_border_spacing_x.to_string());
+-	ret.emplace_back("border_spacing_y", m_css_border_spacing_y.to_string());
+-
+-	return ret;
++        ret.emplace_back("border_spacing_y", m_css_border_spacing_y.to_string());
++       ret.emplace_back("letter_spacing", m_letter_spacing.to_string());
++       string ts;
++       for(size_t i=0;i<m_text_shadow_list.size();i++)
++       {
++               if(i) ts += ",";
++               const auto& sh = m_text_shadow_list[i];
++               ts += sh.offset_x.to_string()+" "+sh.offset_y.to_string();
++               if(sh.blur.val()!=0) ts += " "+sh.blur.to_string();
++               ts += " "+sh.color.to_string();
++       }
++       ret.emplace_back("text_shadow", ts);
++
++        return ret;
+ }
+diff --git a/src/document_container.cpp b/src/document_container.cpp
+index 95f45c62..1d17f680 100644
+--- a/src/document_container.cpp
++++ b/src/document_container.cpp
+@@ -40,3 +40,32 @@ void litehtml::document_container::split_text(const char* text, const std::funct
+ 		on_word(utf32_to_utf8(str));
+ 	}
+ }
++
++void litehtml::document_container::draw_text_with_shadow(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos, const std::vector<text_shadow>& shadow, int letter_spacing, bool rtl)
++{
++       for(const auto& sh : shadow)
++       {
++               position sp = pos;
++               sp.x += (int)sh.offset_x.val();
++               sp.y += (int)sh.offset_y.val();
++               draw_text(hdc, text, hFont, sh.color, sp);
++       }
++
++       if(letter_spacing == 0)
++       {
++               draw_text(hdc, text, hFont, color, pos);
++       }else
++       {
++               int x = pos.x;
++               utf8_to_utf32 u32(text);
++               for(const char32_t* p = u32; *p; ++p)
++               {
++                       string ch = utf32_to_utf8(std::u32string(1, *p));
++                       position cp = pos;
++                       cp.x = x;
++                       draw_text(hdc, ch.c_str(), hFont, color, cp);
++                       int adv = text_width(ch.c_str(), hFont) + (p[1]?letter_spacing:0);
++                       x += rtl ? -adv : adv;
++               }
++       }
++}
+diff --git a/src/el_text.cpp b/src/el_text.cpp
+index 042da326..75db16ba 100644
+--- a/src/el_text.cpp
++++ b/src/el_text.cpp
+@@ -95,8 +95,11 @@ void litehtml::el_text::compute_styles(bool /*recursive*/)
+ 		m_size.width	= 0;
+ 	} else
+ 	{
+-		m_size.height	= fm.height;
+-		m_size.width	= get_document()->container()->text_width(m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font);
++m_size.height   = fm.height;
++litehtml::string txt = m_use_transformed ? m_transformed_text : m_text;
++m_size.width    = get_document()->container()->text_width(txt.c_str(), font);
++int ls = (int)el_parent->css().get_letter_spacing().val();
++if(ls){ utf8_to_utf32 conv(txt); int count=0; for(const char32_t* p=conv; *p; ++p) count++; if(count>1) m_size.width += ls*(count-1); }
+ 	}
+ 	m_draw_spaces = fm.draw_spaces;
+ }
+@@ -122,9 +125,11 @@ void litehtml::el_text::draw(uint_ptr hdc, int x, int y, const position *clip, c
+ 			uint_ptr font = el_parent->css().get_font();
+ 			if(font)
+ 			{
+-				web_color color = el_parent->css().get_color();
+-				doc->container()->draw_text(hdc, m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font,
+-											color, pos);
++                               web_color color = el_parent->css().get_color();
++                               const auto& sh = el_parent->css().get_text_shadow_list();
++                               int ls = (int)el_parent->css().get_letter_spacing().val();
++                               doc->container()->draw_text_with_shadow(hdc, m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font,
++                                       color, pos, sh, ls, false);
+ 			}
+ 		}
+ 	}
+diff --git a/src/style.cpp b/src/style.cpp
+index 65aefdaf..8057301d 100644
+--- a/src/style.cpp
++++ b/src/style.cpp
+@@ -464,11 +464,18 @@ void style::add_property(string_id name, const css_token_vector& value, const st
+ 		parse_text_emphasis_color(val, important, container);
+ 		break;
+ 
+-	case _text_emphasis_position_:
+-		parse_text_emphasis_position(value, important);
+-		break;
++        case _text_emphasis_position_:
++                parse_text_emphasis_position(value, important);
++                break;
++
++        case _text_shadow_:
++                parse_text_shadow(value, important, container);
++                break;
++
++        case _letter_spacing_:
++                return add_length_property(name, val, "normal", f_length, important);
+ 
+-	//  =============================  FLEX  =============================
++        //  =============================  FLEX  =============================
+ 
+ 	case _flex_:
+ 		parse_flex(value, important);
+@@ -1383,7 +1390,46 @@ void style::parse_text_emphasis_position(const css_token_vector &tokens, bool im
+ 			}
+ 		}
+ 	}
+-	add_parsed_property(_text_emphasis_position_, property_value(val, important));
++       add_parsed_property(_text_emphasis_position_, property_value(val, important));
++}
++
++void style::parse_text_shadow(const css_token_vector &tokens, bool important, document_container* container)
++{
++       if(tokens.size()==1 && tokens[0].ident()=="none")
++       {
++               add_parsed_property(_text_shadow_, property_value(std::vector<text_shadow>(), important));
++               return;
++       }
++
++       auto layers = parse_comma_separated_list(tokens);
++       std::vector<text_shadow> result;
++       for(auto& layer : layers)
++       {
++               text_shadow sh{web_color::current_color,0,0,0};
++               css_length lengths[3];
++               int lcount=0;
++               for(const auto& tok : layer)
++               {
++                       css_length len;
++                       if(parse_length(tok, len, f_length, ""))
++                       {
++                               if(lcount<3) lengths[lcount++]=len; else { lcount=0; break; }
++                       } else if(parse_color(tok, sh.color, container))
++                       {
++                       } else {
++                               lcount=0; break;
++                       }
++               }
++               if(lcount>=2)
++               {
++                       sh.offset_x = lengths[0];
++                       sh.offset_y = lengths[1];
++                       if(lcount>=3) sh.blur = lengths[2];
++                       result.push_back(sh);
++               }
++       }
++       if(!result.empty())
++               add_parsed_property(_text_shadow_, property_value(result, important));
+ }
+ 
+ // https://developer.mozilla.org/en-US/docs/Web/CSS/flex
+-- 
+2.43.0
+

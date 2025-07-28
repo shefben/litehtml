@@ -112,8 +112,35 @@ int test_container::text_width(const char* text, uint_ptr hFont)
 
 void test_container::draw_text(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos)
 {
-	Font* font = (Font*)hFont;
-	font->draw_text(*(canvas*)hdc, text, color, pos.x, pos.y);
+        Font* font = (Font*)hFont;
+        font->draw_text(*(canvas*)hdc, text, color, pos.x, pos.y);
+}
+
+void test_container::draw_text_with_shadow(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos, const std::vector<litehtml::text_shadow>& shadow, int letter_spacing, bool rtl)
+{
+       canvas* cvs = (canvas*)hdc;
+       Font* font = (Font*)hFont;
+       for(const auto& sh : shadow)
+       {
+               cvs->set_shadow_color(sh.color.red/255.f, sh.color.green/255.f, sh.color.blue/255.f, sh.color.alpha/255.f);
+               cvs->set_shadow_offset_x((float)sh.offset_x.val());
+               cvs->set_shadow_offset_y((float)sh.offset_y.val());
+               cvs->set_shadow_blur((float)sh.blur.val());
+               font->draw_text(*cvs, text, web_color(sh.color.red,sh.color.green,sh.color.blue,sh.color.alpha), pos.x, pos.y);
+               cvs->set_shadow_color(0,0,0,0);
+               cvs->set_shadow_blur(0);
+               cvs->set_shadow_offset_x(0);
+               cvs->set_shadow_offset_y(0);
+       }
+       int x = pos.x;
+       utf8_to_utf32 u32(text);
+       for(const char32_t* p = u32; *p; ++p)
+       {
+               string ch = utf32_to_utf8(std::u32string(1, *p));
+               font->draw_text(*cvs, ch, color, x, pos.y);
+               int adv = font->text_width(ch) + (p[1]?letter_spacing:0);
+               x += rtl?-adv:adv;
+       }
 }
 
 int test_container::pt_to_px(int pt) const { return pt * 96 / 72; }

@@ -7,6 +7,7 @@
 #include "css_tokenizer.h"
 #include "gradient.h"
 #include "web_color.h"
+#include "css_properties.h"
 
 namespace litehtml
 {
@@ -21,9 +22,10 @@ namespace litehtml
 		css_length,
 		length_vector,
 		float,
-		web_color,
-		vector<image>,
-		string,
+                web_color,
+                vector<image>,
+               vector<text_shadow>,
+                string,
 		string_vector,
 		size_vector,
 		css_token_vector
@@ -93,7 +95,8 @@ namespace litehtml
 
 		void parse_text_emphasis(const css_token_vector& tokens, bool important, document_container* container);
 		bool parse_text_emphasis_color(const css_token& token, bool important, document_container* container);
-		void parse_text_emphasis_position(const css_token_vector& tokens, bool important);
+               void parse_text_emphasis_position(const css_token_vector& tokens, bool important);
+               void parse_text_shadow(const css_token_vector& tokens, bool important, document_container* container);
 
 		void parse_flex_flow(const css_token_vector& tokens, bool important);
 		void parse_flex(const css_token_vector& tokens, bool important);

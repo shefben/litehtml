@@ -40,3 +40,32 @@ void litehtml::document_container::split_text(const char* text, const std::funct
 		on_word(utf32_to_utf8(str));
 	}
 }
+
+void litehtml::document_container::draw_text_with_shadow(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos, const std::vector<text_shadow>& shadow, int letter_spacing, bool rtl)
+{
+       for(const auto& sh : shadow)
+       {
+               position sp = pos;
+               sp.x += (int)sh.offset_x.val();
+               sp.y += (int)sh.offset_y.val();
+               draw_text(hdc, text, hFont, sh.color, sp);
+       }
+
+       if(letter_spacing == 0)
+       {
+               draw_text(hdc, text, hFont, color, pos);
+       }else
+       {
+               int x = pos.x;
+               utf8_to_utf32 u32(text);
+               for(const char32_t* p = u32; *p; ++p)
+               {
+                       string ch = utf32_to_utf8(std::u32string(1, *p));
+                       position cp = pos;
+                       cp.x = x;
+                       draw_text(hdc, ch.c_str(), hFont, color, cp);
+                       int adv = text_width(ch.c_str(), hFont) + (p[1]?letter_spacing:0);
+                       x += rtl ? -adv : adv;
+               }
+       }
+}

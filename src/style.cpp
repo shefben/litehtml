@@ -464,11 +464,18 @@ void style::add_property(string_id name, const css_token_vector& value, const st
 		parse_text_emphasis_color(val, important, container);
 		break;
 
-	case _text_emphasis_position_:
-		parse_text_emphasis_position(value, important);
-		break;
+        case _text_emphasis_position_:
+                parse_text_emphasis_position(value, important);
+                break;
 
-	//  =============================  FLEX  =============================
+        case _text_shadow_:
+                parse_text_shadow(value, important, container);
+                break;
+
+        case _letter_spacing_:
+                return add_length_property(name, val, "normal", f_length, important);
+
+        //  =============================  FLEX  =============================
 
 	case _flex_:
 		parse_flex(value, important);
@@ -1383,7 +1390,46 @@ void style::parse_text_emphasis_position(const css_token_vector &tokens, bool im
 			}
 		}
 	}
-	add_parsed_property(_text_emphasis_position_, property_value(val, important));
+       add_parsed_property(_text_emphasis_position_, property_value(val, important));
+}
+
+void style::parse_text_shadow(const css_token_vector &tokens, bool important, document_container* container)
+{
+       if(tokens.size()==1 && tokens[0].ident()=="none")
+       {
+               add_parsed_property(_text_shadow_, property_value(std::vector<text_shadow>(), important));
+               return;
+       }
+
+       auto layers = parse_comma_separated_list(tokens);
+       std::vector<text_shadow> result;
+       for(auto& layer : layers)
+       {
+               text_shadow sh{web_color::current_color,0,0,0};
+               css_length lengths[3];
+               int lcount=0;
+               for(const auto& tok : layer)
+               {
+                       css_length len;
+                       if(parse_length(tok, len, f_length, ""))
+                       {
+                               if(lcount<3) lengths[lcount++]=len; else { lcount=0; break; }
+                       } else if(parse_color(tok, sh.color, container))
+                       {
+                       } else {
+                               lcount=0; break;
+                       }
+               }
+               if(lcount>=2)
+               {
+                       sh.offset_x = lengths[0];
+                       sh.offset_y = lengths[1];
+                       if(lcount>=3) sh.blur = lengths[2];
+                       result.push_back(sh);
+               }
+       }
+       if(!result.empty())
+               add_parsed_property(_text_shadow_, property_value(result, important));
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/flex
