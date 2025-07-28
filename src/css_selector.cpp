@@ -428,7 +428,8 @@ bool is_supported_simple_pseudo_class(const string& name)
 		// Location Pseudo-classes  https://www.w3.org/TR/selectors-4/#location
 		"any-link", "link", "visited", "local-link", "target", "target-within", "scope",
 		// User Action Pseudo-classes  https://www.w3.org/TR/selectors-4/#useraction-pseudos
-		"hover", "active", "focus", "focus-visible", "focus-within",
+                "hover", "active", "focus", "focus-visible", "focus-within",
+                "checked", "disabled", "enabled", "read-only", "required", "valid", "invalid", "placeholder-shown",
 		// Tree-Structural pseudo-classes  https://www.w3.org/TR/selectors-4/#structural-pseudos
 		"root", "empty", "first-child", "last-child", "only-child", "first-of-type", "last-of-type", "only-of-type",
 	};

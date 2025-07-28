@@ -35,8 +35,9 @@ set(SOURCE_LITEHTML
 	src/el_div.cpp
 	src/element.cpp
 	src/el_font.cpp
-	src/el_image.cpp
-	src/el_link.cpp
+        src/el_image.cpp
+        src/el_input.cpp
+        src/el_link.cpp
 	src/el_para.cpp
 	src/el_script.cpp
 	src/el_space.cpp
@@ -102,9 +103,10 @@ set(HEADER_LITEHTML
 	include/litehtml/el_cdata.h
 	include/litehtml/el_comment.h
 	include/litehtml/el_div.h
-	include/litehtml/el_font.h
-	include/litehtml/el_image.h
-	include/litehtml/el_link.h
+        include/litehtml/el_font.h
+        include/litehtml/el_image.h
+        include/litehtml/el_input.h
+        include/litehtml/el_link.h
 	include/litehtml/el_para.h
 	include/litehtml/el_script.h
 	include/litehtml/el_space.h
@@ -196,14 +198,6 @@ install(EXPORT litehtmlTargets FILE litehtmlTargets.cmake DESTINATION lib${LIB_S
 # Tests
 
 else ()
-	include(ExternalProject)
-	ExternalProject_Add(
-			litehtml-tests
-			GIT_REPOSITORY      https://github.com/litehtml/litehtml-tests.git
-			GIT_TAG             ab4a66548126bce74ecf2dc8027c116701d157c4
-			SOURCE_DIR          "${CMAKE_BINARY_DIR}/litehtml-tests-src"
-			BINARY_DIR          "${CMAKE_BINARY_DIR}/litehtml-tests-build"
-			CMAKE_ARGS          -DLITEHTML_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-			INSTALL_COMMAND     ""
-	)
+        enable_testing()
+        add_subdirectory(tests)
 endif()

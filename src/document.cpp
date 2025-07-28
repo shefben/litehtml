@@ -7,6 +7,7 @@
 #include "el_space.h"
 #include "el_body.h"
 #include "el_image.h"
+#include "el_input.h"
 #include "el_table.h"
 #include "el_td.h"
 #include "el_link.h"
@@ -372,13 +373,17 @@ element::ptr document::create_element(const char* tag_name, const string_map& at
 		{
 			newTag = std::make_shared<el_para>(this_doc);
 		}
-		else if (!strcmp(tag_name, "img"))
-		{
-			newTag = std::make_shared<el_image>(this_doc);
-		}
-		else if (!strcmp(tag_name, "table"))
-		{
-			newTag = std::make_shared<el_table>(this_doc);
+                else if (!strcmp(tag_name, "img"))
+                {
+                        newTag = std::make_shared<el_image>(this_doc);
+                }
+                else if (!strcmp(tag_name, "input"))
+                {
+                        newTag = std::make_shared<el_input>(this_doc);
+                }
+                else if (!strcmp(tag_name, "table"))
+                {
+                        newTag = std::make_shared<el_table>(this_doc);
 		}
 		else if (!strcmp(tag_name, "td") || !strcmp(tag_name, "th"))
 		{
