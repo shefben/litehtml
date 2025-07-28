@@ -52,11 +52,11 @@ string parse_ns_prefix(const css_token_vector& tokens, int& index)
 		return "";
 	}
 
-	if ((a.type == IDENT || a.ch == '*') && b.ch == '|')
-	{
-		index += 2;
-		return a.type == IDENT ? a.name : "*";
-	}
+        if ((a.type == IDENT || a.ch == '*') && b.ch == '|' && at(tokens, index + 2).ch != '|')
+        {
+                index += 2;
+                return a.type == IDENT ? a.name : "*";
+        }
 
 	return "";
 }
@@ -617,6 +617,12 @@ int parse_combinator(const css_token_vector& tokens, int& index)
 		return tok.ch;
 	}
 
+        if (tok.ch == '|' && at(tokens, index + 1).ch == '|')
+        {
+                index += 2;
+                skip_whitespace(tokens, index);
+                return '|';
+        }
 	return ws ? ' ' : 0;
 }
 

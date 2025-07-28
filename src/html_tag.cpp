@@ -447,25 +447,38 @@ int litehtml::html_tag::select(const css_selector& selector, bool apply_pseudo)
 				}
 			}
 			break;
-		case combinator_general_sibling:
-			{
-				bool is_pseudo = false;
-				element::ptr res =  el_parent->find_sibling(shared_from_this(), *selector.m_left, apply_pseudo, &is_pseudo);
-				if(!res)
-				{
-					return select_no_match;
-				} else
-				{
-					if(is_pseudo)
-					{
-						right_res |= select_match_pseudo_class;
-					}
-				}
-			}
-			break;
-		default:
-			right_res = select_no_match;
-		}
+                case combinator_general_sibling:
+                        {
+                                bool is_pseudo = false;
+                                element::ptr res =  el_parent->find_sibling(shared_from_this(), *selector.m_left, apply_pseudo, &is_pseudo);
+                                if(!res)
+                                {
+                                        return select_no_match;
+                                } else
+                                {
+                                        if(is_pseudo)
+                                        {
+                                                right_res |= select_match_pseudo_class;
+                                        }
+                                }
+                        }
+                        break;
+                case combinator_column:
+                        {
+                                bool is_pseudo = false;
+                                element::ptr res = find_ancestor(*selector.m_left, apply_pseudo, &is_pseudo);
+                                if(!res)
+                                {
+                                        return select_no_match;
+                                } else if(is_pseudo)
+                                {
+                                        right_res |= select_match_pseudo_class;
+                                }
+                        }
+                        break;
+                default:
+                        right_res = select_no_match;
+                }
 	}
 	return right_res;
 }
