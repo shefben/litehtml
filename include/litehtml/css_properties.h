@@ -115,10 +115,20 @@ struct box_shadow
 
 		int 					m_order;
 
+                length_vector                           m_grid_template_columns;
+                length_vector                           m_grid_template_rows;
+                css_length                              m_grid_column_gap;
+                css_length                              m_grid_row_gap;
+                int                                     m_grid_column_start;
+                int                                     m_grid_column_end;
+                int                                     m_grid_row_start;
+                int                                     m_grid_row_end;
+
 	private:
 		void compute_font(const html_tag* el, const std::shared_ptr<document>& doc);
 		void compute_background(const html_tag* el, const std::shared_ptr<document>& doc);
-		void compute_flex(const html_tag* el, const std::shared_ptr<document>& doc);
+               void compute_flex(const html_tag* el, const std::shared_ptr<document>& doc);
+               void compute_grid(const html_tag* el, const std::shared_ptr<document>& doc);
 		web_color get_color_property(const html_tag* el, string_id name, bool inherited, web_color default_value, uint_ptr member_offset) const;
 
 	public:
@@ -168,7 +178,15 @@ struct box_shadow
 				m_flex_align_items(flex_align_items_stretch),
 				m_flex_align_self(flex_align_items_auto),
 				m_flex_align_content(flex_align_content_stretch),
-				m_order(0)
+				m_order(0),
+                                m_grid_template_columns(),
+                                m_grid_template_rows(),
+                                m_grid_column_gap(),
+                                m_grid_row_gap(),
+                                m_grid_column_start(1),
+                                m_grid_column_end(2),
+                                m_grid_row_start(1),
+                                m_grid_row_end(2)
 		{}
 
 		void compute(const html_tag* el, const std::shared_ptr<document>& doc);
@@ -304,8 +322,17 @@ struct box_shadow
 		flex_align_items get_flex_align_self() const;
 		flex_align_content get_flex_align_content() const;
 
-		int get_order() const;
-		void set_order(int order);
+               int get_order() const;
+               void set_order(int order);
+
+               const length_vector& get_grid_template_columns() const;
+               const length_vector& get_grid_template_rows() const;
+               const css_length& get_grid_column_gap() const;
+               const css_length& get_grid_row_gap() const;
+               int get_grid_column_start() const;
+               int get_grid_column_end() const;
+               int get_grid_row_start() const;
+               int get_grid_row_end() const;
 
 		int get_text_decoration_line() const;
 		text_decoration_style get_text_decoration_style() const;
@@ -788,6 +815,39 @@ struct box_shadow
        {
                return m_letter_spacing;
        }
+
+inline const length_vector& css_properties::get_grid_template_columns() const
+{
+    return m_grid_template_columns;
+}
+inline const length_vector& css_properties::get_grid_template_rows() const
+{
+    return m_grid_template_rows;
+}
+inline const css_length& css_properties::get_grid_column_gap() const
+{
+    return m_grid_column_gap;
+}
+inline const css_length& css_properties::get_grid_row_gap() const
+{
+    return m_grid_row_gap;
+}
+inline int css_properties::get_grid_column_start() const
+{
+    return m_grid_column_start;
+}
+inline int css_properties::get_grid_column_end() const
+{
+    return m_grid_column_end;
+}
+inline int css_properties::get_grid_row_start() const
+{
+    return m_grid_row_start;
+}
+inline int css_properties::get_grid_row_end() const
+{
+    return m_grid_row_end;
+}
 }
 
 #endif //LITEHTML_CSS_PROPERTIES_H

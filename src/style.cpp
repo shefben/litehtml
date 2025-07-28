@@ -504,10 +504,24 @@ void style::add_property(string_id name, const css_token_vector& value, const st
 		parse_align_self(name, value, important);
 		break;
 
-	case _order_: // <integer>
-		if (val.type == NUMBER && val.n.number_type == css_number_integer)
-			add_parsed_property(name, property_value((int)val.n.number, important));
-		break;
+        case _order_: // <integer>
+                if (val.type == NUMBER && val.n.number_type == css_number_integer)
+                        add_parsed_property(name, property_value((int)val.n.number, important));
+                break;
+
+        case _grid_template_columns_:
+        case _grid_template_rows_:
+                parse_grid_track_list(name, value, important);
+                break;
+
+        case _grid_column_gap_:
+        case _grid_row_gap_:
+                return add_length_property(name, val, "", f_length_percentage|f_positive, important);
+
+        case _grid_column_:
+        case _grid_row_:
+                parse_grid_placement(name, value, important);
+                break;
 
 	//  =============================  COUNTER, CONTENT  =============================
 
@@ -1591,6 +1605,46 @@ void style::parse_flex_flow(const css_token_vector& tokens, bool important)
 
 	add_parsed_property(_flex_direction_, property_value(flex_direction, important));
 	add_parsed_property(_flex_wrap_,      property_value(flex_wrap,      important));
+}
+
+void style::parse_grid_track_list(string_id name, const css_token_vector& tokens, bool important)
+{
+        length_vector tracks;
+        for (const auto& tok : tokens)
+        {
+                css_length len;
+                if(!len.from_token(tok, f_length_percentage))
+                        return;
+                tracks.push_back(len);
+        }
+        add_parsed_property(name, property_value(tracks, important));
+}
+
+void style::parse_grid_placement(string_id name, const css_token_vector& tokens, bool important)
+{
+        int start = 1;
+        int end = start + 1;
+        if(tokens.empty()) return;
+        size_t i = 0;
+        if(tokens[i].ident() == "auto") start = 0;
+        else if(tokens[i].type == NUMBER && tokens[i].n.number_type == css_number_integer)
+                start = (int)tokens[i].n.number;
+        else return;
+        i++;
+        if(i < tokens.size() && tokens[i].ch == '/')
+        {
+                i++;
+                if(i < tokens.size())
+                {
+                        if(tokens[i].ident() == "auto") end = 0;
+                        else if(tokens[i].type == NUMBER && tokens[i].n.number_type == css_number_integer)
+                                end = (int)tokens[i].n.number;
+                        else return;
+                }
+        }
+        string base = _s(name);
+        add_parsed_property(_id(base + "_start"), property_value(start, important));
+        add_parsed_property(_id(base + "_end"), property_value(end, important));
 }
 
 // https://www.w3.org/TR/css-align/#align-self-property

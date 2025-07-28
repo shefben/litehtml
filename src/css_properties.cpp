@@ -249,10 +249,11 @@ void litehtml::css_properties::compute(const html_tag* el, const document::ptr& 
 		doc->container()->load_image(m_list_style_image.c_str(), m_list_style_image_baseurl.c_str(), true);
 	}
 
-	m_order = el->get_property<int>(_order_, false, 0, offset(m_order));
+        m_order = el->get_property<int>(_order_, false, 0, offset(m_order));
 
-	compute_background(el, doc);
-	compute_flex(el, doc);
+        compute_background(el, doc);
+        compute_flex(el, doc);
+        compute_grid(el, doc);
 }
 
 // used for all color properties except `color` (color:currentcolor is converted to color:inherit during parsing)
@@ -554,6 +555,27 @@ void litehtml::css_properties::compute_flex(const html_tag* el, const document::
 			m_display = display_flex;
 		}
 	}
+}
+
+void litehtml::css_properties::compute_grid(const html_tag* el, const document::ptr& doc)
+{
+        if (m_display == display_grid || m_display == display_inline_grid)
+        {
+                m_grid_template_columns = el->get_property<length_vector>(_grid_template_columns_, false, {}, offset(m_grid_template_columns));
+                m_grid_template_rows    = el->get_property<length_vector>(_grid_template_rows_,    false, {}, offset(m_grid_template_rows));
+                m_grid_column_gap       = el->get_property<css_length>(_grid_column_gap_, false, 0, offset(m_grid_column_gap));
+                m_grid_row_gap          = el->get_property<css_length>(_grid_row_gap_,    false, 0, offset(m_grid_row_gap));
+
+                for(auto& l : m_grid_template_columns) doc->cvt_units(l, m_font_metrics, 0);
+                for(auto& l : m_grid_template_rows)    doc->cvt_units(l, m_font_metrics, 0);
+                doc->cvt_units(m_grid_column_gap, m_font_metrics, 0);
+                doc->cvt_units(m_grid_row_gap, m_font_metrics, 0);
+        }
+
+        m_grid_column_start = el->get_property<int>(_grid_column_start_, false, 1, offset(m_grid_column_start));
+        m_grid_column_end   = el->get_property<int>(_grid_column_end_,   false, m_grid_column_start + 1, offset(m_grid_column_end));
+        m_grid_row_start    = el->get_property<int>(_grid_row_start_,    false, 1, offset(m_grid_row_start));
+        m_grid_row_end      = el->get_property<int>(_grid_row_end_,      false, m_grid_row_start + 1, offset(m_grid_row_end));
 }
 
 std::vector<std::tuple<litehtml::string, litehtml::string>> litehtml::css_properties::dump_get_attrs()
