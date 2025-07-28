@@ -1,5 +1,6 @@
 #include "utf8_strings.h"
 #include "document_container.h"
+#include "background.h"
 
 void litehtml::document_container::split_text(const char* text, const std::function<void(const char*)>& on_word, const std::function<void(const char*)>& on_space)
 {
@@ -67,5 +68,20 @@ void litehtml::document_container::draw_text_with_shadow(uint_ptr hdc, const cha
                        int adv = text_width(ch.c_str(), hFont) + (p[1]?letter_spacing:0);
                        x += rtl ? -adv : adv;
                }
+       }
+}
+
+void litehtml::document_container::draw_box_shadow(uint_ptr hdc, const std::vector<box_shadow>& shadow, const position& border_box, const border_radiuses&)
+{
+       for(const auto& sh : shadow)
+       {
+               position sp = border_box;
+               sp.x += (int)sh.offset_x.val() - (int)sh.spread.val();
+               sp.y += (int)sh.offset_y.val() - (int)sh.spread.val();
+               sp.width  += (int)(sh.spread.val()*2);
+               sp.height += (int)(sh.spread.val()*2);
+               background_layer layer;
+               layer.border_box = sp;
+               draw_solid_fill(hdc, layer, sh.color);
        }
 }

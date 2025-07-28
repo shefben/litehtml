@@ -408,6 +408,16 @@ void litehtml::css_properties::compute_font(const html_tag* el, const document::
                doc->cvt_units(sh.offset_y, m_font_metrics, 0);
                doc->cvt_units(sh.blur, m_font_metrics, m_font_metrics.font_size);
        }
+
+       m_box_shadow_list = el->get_property<std::vector<box_shadow>>(_box_shadow_, true, {}, offset(m_box_shadow_list));
+       for(auto& sh : m_box_shadow_list)
+       {
+               if(sh.color.is_current_color) sh.color = m_color;
+               doc->cvt_units(sh.offset_x, m_font_metrics, 0);
+               doc->cvt_units(sh.offset_y, m_font_metrics, 0);
+               doc->cvt_units(sh.blur, m_font_metrics, 0);
+               doc->cvt_units(sh.spread, m_font_metrics, 0);
+       }
 		if(m_text_emphasis_color == web_color::current_color)
 		{
 			m_text_emphasis_color = el->parent()->css().get_text_emphasis_color();
@@ -578,7 +588,7 @@ std::vector<std::tuple<litehtml::string, litehtml::string>> litehtml::css_proper
 	ret.emplace_back("list_style_type", index_value(m_list_style_type, list_style_type_strings));
 	ret.emplace_back("list_style_position", index_value(m_list_style_position, list_style_position_strings));
 	ret.emplace_back("border_spacing_x", m_css_border_spacing_x.to_string());
-        ret.emplace_back("border_spacing_y", m_css_border_spacing_y.to_string());
+       ret.emplace_back("border_spacing_y", m_css_border_spacing_y.to_string());
        ret.emplace_back("letter_spacing", m_letter_spacing.to_string());
        string ts;
        for(size_t i=0;i<m_text_shadow_list.size();i++)
@@ -590,6 +600,18 @@ std::vector<std::tuple<litehtml::string, litehtml::string>> litehtml::css_proper
                ts += " "+sh.color.to_string();
        }
        ret.emplace_back("text_shadow", ts);
+       ts.clear();
+       for(size_t i=0;i<m_box_shadow_list.size();i++)
+       {
+               if(i) ts += ",";
+               const auto& sh = m_box_shadow_list[i];
+               ts += sh.offset_x.to_string()+" "+sh.offset_y.to_string();
+               if(sh.blur.val()!=0) ts += " "+sh.blur.to_string();
+               if(sh.spread.val()!=0) ts += " "+sh.spread.to_string();
+               if(sh.inset) ts += " inset";
+               ts += " "+sh.color.to_string();
+       }
+       ret.emplace_back("box_shadow", ts);
 
-        return ret;
+       return ret;
 }

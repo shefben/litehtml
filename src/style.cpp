@@ -468,12 +468,16 @@ void style::add_property(string_id name, const css_token_vector& value, const st
                 parse_text_emphasis_position(value, important);
                 break;
 
-        case _text_shadow_:
-                parse_text_shadow(value, important, container);
-                break;
+       case _text_shadow_:
+               parse_text_shadow(value, important, container);
+               break;
 
-        case _letter_spacing_:
-                return add_length_property(name, val, "normal", f_length, important);
+       case _box_shadow_:
+               parse_box_shadow(value, important, container);
+               break;
+
+       case _letter_spacing_:
+               return add_length_property(name, val, "normal", f_length, important);
 
         //  =============================  FLEX  =============================
 
@@ -1430,6 +1434,51 @@ void style::parse_text_shadow(const css_token_vector &tokens, bool important, do
        }
        if(!result.empty())
                add_parsed_property(_text_shadow_, property_value(result, important));
+}
+
+void style::parse_box_shadow(const css_token_vector &tokens, bool important, document_container* container)
+{
+       if(tokens.size()==1 && tokens[0].ident()=="none")
+       {
+               add_parsed_property(_box_shadow_, property_value(std::vector<box_shadow>(), important));
+               return;
+       }
+
+       auto layers = parse_comma_separated_list(tokens);
+       std::vector<box_shadow> result;
+       for(auto& layer : layers)
+       {
+               box_shadow sh{web_color::current_color,0,0,0,0,false};
+               css_length lengths[4];
+               int lcount=0;
+               for(const auto& tok : layer)
+               {
+                       if(tok.ident()=="inset")
+                       {
+                               sh.inset = true;
+                               continue;
+                       }
+                       css_length len;
+                       if(parse_length(tok, len, f_length, ""))
+                       {
+                               if(lcount<4) lengths[lcount++]=len; else { lcount=0; break; }
+                       } else if(parse_color(tok, sh.color, container))
+                       {
+                       } else {
+                               lcount=0; break;
+                       }
+               }
+               if(lcount>=2)
+               {
+                       sh.offset_x = lengths[0];
+                       sh.offset_y = lengths[1];
+                       if(lcount>=3) sh.blur = lengths[2];
+                       if(lcount>=4) sh.spread = lengths[3];
+                       result.push_back(sh);
+               }
+       }
+       if(!result.empty())
+               add_parsed_property(_box_shadow_, property_value(result, important));
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/flex

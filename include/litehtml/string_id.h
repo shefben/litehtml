@@ -285,6 +285,7 @@ STRING_ID(
         _text_indent_,
         _letter_spacing_,
         _text_shadow_,
+        _box_shadow_,
         _top_,
 	_right_,
 	_bottom_,

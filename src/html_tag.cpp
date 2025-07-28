@@ -876,29 +876,35 @@ void litehtml::html_tag::draw_background(uint_ptr hdc, int x, int y, const posit
 			pos.y += v_offset;
 			pos.height -= v_offset;
 
-			const background* bg = get_background();
-			if(bg)
-			{
-				int num_layers = bg->get_layers_number();
-				for(int i = num_layers - 1; i >= 0; i--)
-				{
-					background_layer layer;
-					if(!bg->get_layer(i, pos, this, ri, layer)) continue;
-					if(is_root() && (clip != nullptr))
-					{
-						layer.clip_box = *clip;
-						layer.border_box = *clip;
-					}
-					bg->draw_layer(hdc, i, layer, get_document()->container());
-				}
-			}
+                       const background* bg = get_background();
+                       if(bg)
+                       {
+                               int num_layers = bg->get_layers_number();
+                               for(int i = num_layers - 1; i >= 0; i--)
+                               {
+                                       background_layer layer;
+                                       if(!bg->get_layer(i, pos, this, ri, layer)) continue;
+                                       if(is_root() && (clip != nullptr))
+                                       {
+                                               layer.clip_box = *clip;
+                                               layer.border_box = *clip;
+                                       }
+                                       bg->draw_layer(hdc, i, layer, get_document()->container());
+                               }
+                       }
 
-			borders bdr = m_css.get_borders();
-			if(bdr.is_visible())
-			{
-				bdr.radius = m_css.get_borders().radius.calc_percents(border_box.width, border_box.height);
-				get_document()->container()->draw_borders(hdc, bdr, border_box, is_root());
-			}
+                       if(!m_css.get_box_shadow_list().empty())
+                       {
+                               border_radiuses rds = m_css.get_borders().radius.calc_percents(border_box.width, border_box.height);
+                               get_document()->container()->draw_box_shadow(hdc, m_css.get_box_shadow_list(), border_box, rds);
+                       }
+
+                       borders bdr = m_css.get_borders();
+                       if(bdr.is_visible())
+                       {
+                               bdr.radius = m_css.get_borders().radius.calc_percents(border_box.width, border_box.height);
+                               get_document()->container()->draw_borders(hdc, bdr, border_box, is_root());
+                       }
 		}
 	} else
 	{
@@ -952,23 +958,28 @@ void litehtml::html_tag::draw_background(uint_ptr hdc, int x, int y, const posit
 					bdr.right	= m_css.get_borders().right;
 				}
 
-				if(bg)
-				{
-					int num_layers = bg->get_layers_number();
-					for(int i = num_layers - 1; i >= 0; i--)
-					{
-						background_layer layer;
-						if(!bg->get_layer(i, content_box, this, ri, layer)) continue;
-						layer.border_radius = bdr.radius.calc_percents(box->width, box->height);
-						bg->draw_layer(hdc, i, layer, get_document()->container());
-					}
-				}
-				if(bdr.is_visible())
-				{
-					borders b = bdr;
-					b.radius = bdr.radius.calc_percents(box->width, box->height);
-					get_document()->container()->draw_borders(hdc, b, *box, false);
-				}
+                               if(bg)
+                               {
+                                       int num_layers = bg->get_layers_number();
+                                       for(int i = num_layers - 1; i >= 0; i--)
+                                       {
+                                               background_layer layer;
+                                               if(!bg->get_layer(i, content_box, this, ri, layer)) continue;
+                                               layer.border_radius = bdr.radius.calc_percents(box->width, box->height);
+                                               bg->draw_layer(hdc, i, layer, get_document()->container());
+                                       }
+                               }
+                               if(!m_css.get_box_shadow_list().empty())
+                               {
+                                       border_radiuses rds = bdr.radius.calc_percents(box->width, box->height);
+                                       get_document()->container()->draw_box_shadow(hdc, m_css.get_box_shadow_list(), *box, rds);
+                               }
+                               if(bdr.is_visible())
+                               {
+                                       borders b = bdr;
+                                       b.radius = bdr.radius.calc_percents(box->width, box->height);
+                                       get_document()->container()->draw_borders(hdc, b, *box, false);
+                               }
 			}
 		}
 	}
