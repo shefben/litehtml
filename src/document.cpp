@@ -38,7 +38,7 @@ document::document(document_container* container)
 
 document::~document()
 {
-	m_over_element = m_active_element = nullptr;
+	m_over_element = m_active_element = m_focus_element = nullptr;
 	if(m_container)
 	{
 		for(auto& font : m_fonts)
@@ -754,18 +754,29 @@ bool document::on_lbutton_down( int x, int y, int client_x, int client_y, positi
 
 bool document::on_lbutton_up( int /*x*/, int /*y*/, int /*client_x*/, int /*client_y*/, position::vector& redraw_boxes )
 {
-	if(!m_root || !m_root_render)
-	{
-		return false;
-	}
-	if(m_over_element)
-	{
-		if(m_over_element->on_lbutton_up(m_active_element == m_over_element))
-		{
-			return m_root->find_styles_changes(redraw_boxes);
-		}
-	}
-	return false;
+        if(!m_root || !m_root_render)
+        {
+                return false;
+        }
+        bool changed = false;
+        bool is_click = (m_active_element == m_over_element);
+        if(m_over_element)
+        {
+                if(m_over_element->on_lbutton_up(is_click))
+                {
+                        changed = true;
+                }
+        }
+        if(is_click)
+        {
+                if(set_focus_element(m_over_element))
+                        changed = true;
+        }
+        if(changed)
+        {
+                return m_root->find_styles_changes(redraw_boxes);
+        }
+        return false;
 }
 
 bool document::on_button_cancel(position::vector& redraw_boxes) {
@@ -795,7 +806,55 @@ void document::get_fixed_boxes( position::vector& fixed_boxes )
 
 void document::add_fixed_box( const position& pos )
 {
-	m_fixed_boxes.push_back(pos);
+        m_fixed_boxes.push_back(pos);
+}
+
+bool document::set_focus_element(const std::shared_ptr<element>& el)
+{
+        if(el == m_focus_element)
+                return false;
+
+        auto clear_focus = [this](const std::shared_ptr<element>& node)
+        {
+                if(!node) return;
+                auto e = node;
+                bool first = true;
+                while(e)
+                {
+                        if(first)
+                        {
+                                e->set_pseudo_class(_focus_, false);
+                                e->set_pseudo_class(_focus_visible_, false);
+                        }
+                        e->set_pseudo_class(_focus_within_, false);
+                        e = e->parent();
+                        first = false;
+                }
+        };
+
+        clear_focus(m_focus_element);
+        m_focus_element = el;
+
+        auto set_focus = [](const std::shared_ptr<element>& node)
+        {
+                if(!node) return;
+                auto e = node;
+                bool first = true;
+                while(e)
+                {
+                        if(first)
+                        {
+                                e->set_pseudo_class(_focus_, true);
+                                e->set_pseudo_class(_focus_visible_, true);
+                        }
+                        e->set_pseudo_class(_focus_within_, true);
+                        e = e->parent();
+                        first = false;
+                }
+        };
+
+        set_focus(m_focus_element);
+        return true;
 }
 
 bool document::media_changed()

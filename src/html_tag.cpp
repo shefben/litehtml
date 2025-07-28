@@ -647,17 +647,25 @@ int html_tag::select_pseudoclass(const css_attribute_selector& sel)
 			return select_no_match;
 		}
 		break;
-	case _lang_:
-		if (!get_document()->match_lang(sel.value))
-		{
-			return select_no_match;
-		}
-		break;
-	default:
-		if (!(sel.name in m_pseudo_classes))
-		{
-			return select_no_match;
-		}
+        case _lang_:
+                if (!get_document()->match_lang(sel.value))
+                {
+                        return select_no_match;
+                }
+                break;
+        case _focus_:
+        case _focus_visible_:
+        case _focus_within_:
+                if (!(sel.name in m_pseudo_classes))
+                {
+                        return select_no_match;
+                }
+                break;
+        default:
+                if (!(sel.name in m_pseudo_classes))
+                {
+                        return select_no_match;
+                }
 		break;
 	}
 	return select_match;

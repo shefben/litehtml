@@ -63,6 +63,7 @@ namespace litehtml
 		position::vector					m_fixed_boxes;
 		std::shared_ptr<element>			m_over_element;
 		std::shared_ptr<element>			m_active_element;
+                std::shared_ptr<element>			m_focus_element;
 		std::list<shared_ptr<render_item>>	m_tabular_elements;
 		media_query_list_list::vector		m_media_lists;
 		media_features						m_media;
@@ -103,6 +104,8 @@ namespace litehtml
 		bool							match_lang(const string& lang);
 		void							add_tabular(const std::shared_ptr<render_item>& el);
 		std::shared_ptr<const element>	get_over_element() const { return m_over_element; }
+                std::shared_ptr<const element>  get_focus_element() const { return m_focus_element; }
+                bool                                set_focus_element(const std::shared_ptr<element>& el);
 
 		void							append_children_from_string(element& parent, const char* str);
 		void							dump(dumper& cout);
