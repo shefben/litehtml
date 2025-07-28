@@ -315,11 +315,17 @@ STRING_ID(
 	_flex_shrink_,
 	_flex_basis_,
 
-	_caption_side_,
-	_order_,
+        _caption_side_,
+        _order_,
 
-	_counter_reset_,
-	_counter_increment_,
+        _page_break_after_,
+        _page_break_before_,
+        _orphans_,
+        _widows_,
+        _table_layout_,
+
+        _counter_reset_,
+        _counter_increment_,
 
 	// some CSS dimensions
 	_deg_,

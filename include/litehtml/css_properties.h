@@ -111,7 +111,13 @@ struct box_shadow
 		flex_align_items		m_flex_align_self;
 		flex_align_content		m_flex_align_content;
 
-		caption_side			m_caption_side;
+                page_break                      m_page_break_before;
+                page_break                      m_page_break_after;
+                int                             m_orphans;
+                int                             m_widows;
+                table_layout                    m_table_layout;
+
+                caption_side			m_caption_side;
 
 		int 					m_order;
 
@@ -168,6 +174,11 @@ struct box_shadow
 				m_flex_align_items(flex_align_items_stretch),
 				m_flex_align_self(flex_align_items_auto),
 				m_flex_align_content(flex_align_content_stretch),
+                                m_page_break_before(page_break_auto),
+                                m_page_break_after(page_break_auto),
+                                m_orphans(2),
+                                m_widows(2),
+                                m_table_layout(table_layout_auto),
 				m_order(0)
 		{}
 
@@ -291,11 +302,22 @@ struct box_shadow
 		const css_length& get_border_spacing_y() const;
 		void set_border_spacing_y(const css_length& mBorderSpacingY);
 
-		caption_side get_caption_side() const;
-		void set_caption_side(caption_side side);
+                caption_side get_caption_side() const;
+                void set_caption_side(caption_side side);
 
-		float get_flex_grow() const;
-		float get_flex_shrink() const;
+                page_break get_page_break_before() const;
+                void set_page_break_before(page_break);
+                page_break get_page_break_after() const;
+                void set_page_break_after(page_break);
+                int get_orphans() const;
+                void set_orphans(int);
+                int get_widows() const;
+                void set_widows(int);
+                table_layout get_table_layout() const;
+                void set_table_layout(table_layout);
+
+                float get_flex_grow() const;
+                float get_flex_shrink() const;
 		const css_length& get_flex_basis() const;
 		flex_direction get_flex_direction() const;
 		flex_wrap get_flex_wrap() const;
@@ -720,14 +742,55 @@ struct box_shadow
 		return m_flex_align_content;
 	}
 
-	inline caption_side css_properties::get_caption_side() const
-	{
-		return m_caption_side;
-	}
-	inline void css_properties::set_caption_side(caption_side side)
-	{
-		m_caption_side = side;
-	}
+        inline caption_side css_properties::get_caption_side() const
+        {
+                return m_caption_side;
+        }
+        inline void css_properties::set_caption_side(caption_side side)
+        {
+                m_caption_side = side;
+        }
+
+        inline page_break css_properties::get_page_break_before() const
+        {
+                return m_page_break_before;
+        }
+        inline void css_properties::set_page_break_before(page_break v)
+        {
+                m_page_break_before = v;
+        }
+        inline page_break css_properties::get_page_break_after() const
+        {
+                return m_page_break_after;
+        }
+        inline void css_properties::set_page_break_after(page_break v)
+        {
+                m_page_break_after = v;
+        }
+        inline int css_properties::get_orphans() const
+        {
+                return m_orphans;
+        }
+        inline void css_properties::set_orphans(int v)
+        {
+                m_orphans = v;
+        }
+        inline int css_properties::get_widows() const
+        {
+                return m_widows;
+        }
+        inline void css_properties::set_widows(int v)
+        {
+                m_widows = v;
+        }
+        inline table_layout css_properties::get_table_layout() const
+        {
+                return m_table_layout;
+        }
+        inline void css_properties::set_table_layout(table_layout t)
+        {
+                m_table_layout = t;
+        }
 
 	inline int css_properties::get_order() const
 	{

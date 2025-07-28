@@ -25,6 +25,11 @@ void litehtml::css_properties::compute(const html_tag* el, const document::ptr& 
 	m_text_transform = (text_transform)	  el->get_property<int>( _text_transform_,	true,	text_transform_none,	 offset(m_text_transform));
 	m_white_space	 = (white_space)	  el->get_property<int>( _white_space_,		true,	white_space_normal,		 offset(m_white_space));
 	m_caption_side	 = (caption_side)	  el->get_property<int>( _caption_side_,	true,	caption_side_top,		 offset(m_caption_side));
+        m_page_break_before = (page_break) el->get_property<int>(_page_break_before_, true, page_break_auto, offset(m_page_break_before));
+        m_page_break_after  = (page_break) el->get_property<int>(_page_break_after_,  true, page_break_auto, offset(m_page_break_after));
+        m_orphans = el->get_property<int>(_orphans_, true, 2, offset(m_orphans));
+        m_widows  = el->get_property<int>(_widows_,  true, 2, offset(m_widows));
+        m_table_layout = (table_layout) el->get_property<int>(_table_layout_, true, table_layout_auto, offset(m_table_layout));
 
 	// https://www.w3.org/TR/CSS22/visuren.html#dis-pos-flo
 	if (m_display == display_none)

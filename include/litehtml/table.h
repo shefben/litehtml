@@ -239,6 +239,7 @@ namespace litehtml
 		void			distribute_width(int width, int start, int end);
 		void			distribute_width(int width, int start, int end, table_column_accessor* acc);
 		int				calc_table_width(int block_width, bool is_auto, int& min_table_width, int& max_table_width);
+                int                             calc_table_width_fixed(int block_width);
 		void			calc_horizontal_positions(const margins& table_borders, border_collapse bc, int bdr_space_x);
 		void			calc_vertical_positions(const margins& table_borders, border_collapse bc, int bdr_space_y);
 		void			calc_rows_height(int blockHeight, int borderSpacingY);

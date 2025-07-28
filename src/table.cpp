@@ -318,8 +318,10 @@ int litehtml::table_grid::calc_table_width(int block_width, bool is_auto, int& m
 
 	if(cur_width == block_width)
 	{
-		return cur_width;
-	}
+        return cur_width;
+}
+
+
 
 	if(cur_width < block_width)
 	{
@@ -406,6 +408,34 @@ int litehtml::table_grid::calc_table_width(int block_width, bool is_auto, int& m
 	}
 	return cur_width;
 }
+
+int litehtml::table_grid::calc_table_width_fixed(int block_width)
+{
+    int specified = 0;
+    int auto_cols = 0;
+    for(int col = 0; col < m_cols_count; col++)
+    {
+        if(!m_columns[col].css_width.is_predefined())
+        {
+            m_columns[col].width = m_columns[col].css_width.calc_percent(block_width);
+            specified += m_columns[col].width;
+        } else {
+            auto_cols++;
+            m_columns[col].width = 0;
+        }
+    }
+    int remaining = block_width - specified;
+    int auto_w = auto_cols ? remaining / auto_cols : 0;
+    for(int col = 0; col < m_cols_count; col++)
+    {
+        if(m_columns[col].width == 0)
+        {
+            m_columns[col].width = std::max(auto_w, m_columns[col].min_width);
+        }
+    }
+    return block_width;
+}
+
 
 void litehtml::table_grid::clear()
 {

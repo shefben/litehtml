@@ -147,7 +147,12 @@ int litehtml::render_item_table::_render(int x, int y, const containing_block_co
     int min_table_width = 0;
     int max_table_width = 0;
 
-    if (self_size.width.type == containing_block_context::cbc_value_type_absolute)
+    if (src_el()->css().get_table_layout() == table_layout_fixed)
+    {
+        table_width = m_grid->calc_table_width_fixed(self_size.render_width - table_width_spacing);
+        min_table_width = max_table_width = table_width;
+    }
+    else if (self_size.width.type == containing_block_context::cbc_value_type_absolute)
     {
         table_width = m_grid->calc_table_width(self_size.render_width - table_width_spacing, false, min_table_width, max_table_width);
     }

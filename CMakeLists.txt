@@ -4,7 +4,7 @@ project(litehtml LANGUAGES C CXX)
 
 option(LITEHTML_BUILD_TESTING "enable testing for litehtml" OFF)
 
-if (NOT LITEHTML_BUILD_TESTING)
+# Build library
 # Soname
 # MAJOR is incremented when symbols are removed or changed in an incompatible way
 # MINOR is incremented when new symbols are added
@@ -196,8 +196,7 @@ install(FILES cmake/litehtmlConfig.cmake DESTINATION lib${LIB_SUFFIX}/cmake/lite
 install(EXPORT litehtmlTargets FILE litehtmlTargets.cmake DESTINATION lib${LIB_SUFFIX}/cmake/litehtml)
 
 # Tests
-
-else ()
+if (LITEHTML_BUILD_TESTING)
         enable_testing()
         add_subdirectory(tests)
 endif()

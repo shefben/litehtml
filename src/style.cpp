@@ -65,7 +65,11 @@ std::map<string_id, string> style::m_valid_values =
 	{ _align_items_, flex_align_items_strings },
 	{ _align_self_, flex_align_items_strings },
 
-	{ _caption_side_, caption_side_strings },
+        { _caption_side_, caption_side_strings },
+
+        { _table_layout_, table_layout_strings },
+        { _page_break_before_, page_break_strings },
+        { _page_break_after_, page_break_strings },
 
 	{ _text_decoration_style_, style_text_decoration_style_strings },
 	{ _text_emphasis_position_, style_text_emphasis_position_strings },
@@ -225,16 +229,19 @@ void style::add_property(string_id name, const css_token_vector& value, const st
 	case _border_right_style_:
 	case _border_collapse_:
 
-	case _flex_direction_:
-	case _flex_wrap_:
-	case _justify_content_:
-	case _align_content_:
+        case _flex_direction_:
+        case _flex_wrap_:
+        case _justify_content_:
+        case _align_content_:
 
-	case _caption_side_:
+        case _caption_side_:
+        case _table_layout_:
+        case _page_break_before_:
+        case _page_break_after_:
 
-		if (int index = value_index(ident, m_valid_values[name]); index >= 0)
-			add_parsed_property(name, property_value(index, important));
-		break;
+                if (int index = value_index(ident, m_valid_values[name]); index >= 0)
+                        add_parsed_property(name, property_value(index, important));
+                break;
 
 	//  =============================  LENGTH  =============================
 
@@ -504,10 +511,16 @@ void style::add_property(string_id name, const css_token_vector& value, const st
 		parse_align_self(name, value, important);
 		break;
 
-	case _order_: // <integer>
-		if (val.type == NUMBER && val.n.number_type == css_number_integer)
-			add_parsed_property(name, property_value((int)val.n.number, important));
-		break;
+        case _order_: // <integer>
+                if (val.type == NUMBER && val.n.number_type == css_number_integer)
+                        add_parsed_property(name, property_value((int)val.n.number, important));
+                break;
+
+        case _orphans_:
+        case _widows_:
+                if (val.type == NUMBER && val.n.number_type == css_number_integer)
+                        add_parsed_property(name, property_value((int)val.n.number, important));
+                break;
 
 	//  =============================  COUNTER, CONTENT  =============================
 
