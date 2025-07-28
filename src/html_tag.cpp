@@ -902,7 +902,7 @@ void litehtml::html_tag::draw_background(uint_ptr hdc, int x, int y, const posit
                                                layer.clip_box = *clip;
                                                layer.border_box = *clip;
                                        }
-                                       bg->draw_layer(hdc, i, layer, get_document()->container());
+                                       bg->draw_layer(hdc, i, layer, get_document()->container(), m_css.get_opacity());
                                }
                        }
 
@@ -979,7 +979,7 @@ void litehtml::html_tag::draw_background(uint_ptr hdc, int x, int y, const posit
                                                background_layer layer;
                                                if(!bg->get_layer(i, content_box, this, ri, layer)) continue;
                                                layer.border_radius = bdr.radius.calc_percents(box->width, box->height);
-                                               bg->draw_layer(hdc, i, layer, get_document()->container());
+                                               bg->draw_layer(hdc, i, layer, get_document()->container(), m_css.get_opacity());
                                        }
                                }
                                if(!m_css.get_box_shadow_list().empty())

@@ -139,7 +139,7 @@ namespace litehtml
 		std::unique_ptr<background_layer::linear_gradient> get_linear_gradient_layer(int idx, const background_layer& layer) const;
 		std::unique_ptr<background_layer::radial_gradient> get_radial_gradient_layer(int idx, const background_layer& layer) const;
 		std::unique_ptr<background_layer::conic_gradient> get_conic_gradient_layer(int idx, const background_layer& layer) const;
-		void draw_layer(uint_ptr hdc, int idx, const background_layer& layer, document_container* container) const;
+               void draw_layer(uint_ptr hdc, int idx, const background_layer& layer, document_container* container, float opacity = 1.0f) const;
 	};
 }
 

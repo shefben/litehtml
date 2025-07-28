@@ -651,17 +651,19 @@ litehtml::background::layer_type litehtml::background::get_layer_type(int idx) c
 	return type_none;
 }
 
-void litehtml::background::draw_layer(uint_ptr hdc, int idx, const background_layer& layer, document_container* container) const
+void litehtml::background::draw_layer(uint_ptr hdc, int idx, const background_layer& layer, document_container* container, float opacity) const
 {
 	switch (get_layer_type(idx))
 	{
 		case background::type_color:
 			{
-				auto color_layer = get_color_layer(idx);
-				if(color_layer)
-				{
-					container->draw_solid_fill(hdc, layer, color_layer->color);
-				}
+                                auto color_layer = get_color_layer(idx);
+                                if(color_layer)
+                                {
+                                        web_color col = color_layer->color;
+                                        col.alpha = (byte)std::round(col.alpha * opacity);
+                                        container->draw_solid_fill(hdc, layer, col);
+                                }
 			}
 			break;
 		case background::type_image:

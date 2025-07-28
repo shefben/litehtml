@@ -3,6 +3,7 @@
 #include "render_item.h"
 #include "document_container.h"
 #include "utf8_strings.h"
+#include <cmath>
 
 litehtml::el_text::el_text(const char* text, const document::ptr& doc) : element(doc)
 {
@@ -127,7 +128,10 @@ void litehtml::el_text::draw(uint_ptr hdc, int x, int y, const position *clip, c
 			if(font)
 			{
                                web_color color = el_parent->css().get_color();
-                               const auto& sh = el_parent->css().get_text_shadow_list();
+                               float op = el_parent->css().get_opacity();
+                               color.alpha = (byte)std::round(color.alpha * op);
+                               auto sh = el_parent->css().get_text_shadow_list();
+                               for(auto& s : sh) s.color.alpha = (byte)std::round(s.color.alpha * op);
                                int ls = (int)el_parent->css().get_letter_spacing().val();
                                doc->container()->draw_text_with_shadow(hdc, m_use_transformed ? m_transformed_text.c_str() : m_text.c_str(), font,
                                        color, pos, sh, ls, false);

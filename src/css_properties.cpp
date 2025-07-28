@@ -10,7 +10,10 @@
 
 void litehtml::css_properties::compute(const html_tag* el, const document::ptr& doc)
 {
-	m_color = el->get_property<web_color>(_color_, true, web_color::black, offset(m_color));
+        m_color = el->get_property<web_color>(_color_, true, web_color::black, offset(m_color));
+        m_opacity = el->get_property<float>(_opacity_, false, 1.0f, offset(m_opacity));
+        if(el->parent()) m_opacity *= el->parent()->css().get_opacity();
+        m_filter = el->get_property<css_token_vector>(_filter_, false, {}, offset(m_filter));
 
 	m_el_position	 = (element_position) el->get_property<int>( _position_,		false,	element_position_static, offset(m_el_position));
 	m_display		 = (style_display)	  el->get_property<int>( _display_,			false,	display_inline,			 offset(m_display));
