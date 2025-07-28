@@ -159,8 +159,16 @@ STRING_ID(
 	_not_,
 	_lang_,
 
-	_active_,
-	_hover_,
+        _active_,
+        _hover_,
+        _checked_,
+        _disabled_,
+        _enabled_,
+        _read_only_,
+        _required_,
+        _valid_,
+        _invalid_,
+        _placeholder_shown_,
 
 	// CSS property names
 	// Side properties must go in this order: top, right, bottom, left (clockwise starting from the top).
