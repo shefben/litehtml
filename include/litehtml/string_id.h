@@ -161,6 +161,9 @@ STRING_ID(
 
         _active_,
         _hover_,
+        _focus_,
+        _focus_visible_,
+        _focus_within_,
         _checked_,
         _disabled_,
         _enabled_,

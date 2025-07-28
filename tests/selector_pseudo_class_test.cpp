@@ -34,3 +34,22 @@ TEST(Selectors, ColumnCombinatorParse)
     ASSERT_EQ(combinator_column, sel.m_combinator);
 }
 
+TEST(Selectors, FocusPseudoClasses)
+{
+    simple_container tc;
+    auto doc = document::createFromString("<div id='outer'><div id='inner'></div></div>", &tc);
+    auto inner = doc->root()->select_one("#inner");
+    auto outer = doc->root()->select_one("#outer");
+    ASSERT_TRUE(inner);
+    ASSERT_TRUE(outer);
+
+    EXPECT_EQ(nullptr, doc->root()->select_one("#inner:focus"));
+    EXPECT_EQ(nullptr, doc->root()->select_one("#outer:focus-within"));
+
+    doc->set_focus_element(inner);
+
+    EXPECT_EQ(inner, doc->root()->select_one("#inner:focus"));
+    EXPECT_EQ(inner, doc->root()->select_one("#inner:focus-visible"));
+    EXPECT_EQ(outer, doc->root()->select_one("#outer:focus-within"));
+}
+
