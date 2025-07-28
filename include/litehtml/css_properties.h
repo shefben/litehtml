@@ -97,6 +97,8 @@ struct box_shadow
 		web_color				m_color;
 		string					m_cursor;
 		string					m_content;
+                float                                   m_opacity;
+                css_token_vector                        m_filter;
 		border_collapse			m_border_collapse;
 		css_length				m_css_border_spacing_x;
 		css_length				m_css_border_spacing_y;
@@ -308,8 +310,11 @@ struct box_shadow
 		const string& get_cursor() const;
 		void set_cursor(const string& cursor);
 
-		const string& get_content() const;
-		void set_content(const string& content);
+               const string& get_content() const;
+               void set_content(const string& content);
+
+               float get_opacity() const;
+               const css_token_vector& get_filter() const;
 
 		border_collapse get_border_collapse() const;
 		void set_border_collapse(border_collapse mBorderCollapse);
@@ -686,8 +691,18 @@ struct box_shadow
 	inline const string& css_properties::get_cursor() const { return m_cursor; }
 	inline void css_properties::set_cursor(const string& cursor) { m_cursor = cursor; }
 
-	inline const string& css_properties::get_content() const { return m_content; }
-	inline void css_properties::set_content(const string& content) { m_content = content; }
+inline const string& css_properties::get_content() const { return m_content; }
+inline void css_properties::set_content(const string& content) { m_content = content; }
+
+inline float css_properties::get_opacity() const
+{
+    return m_opacity;
+}
+
+inline const css_token_vector& css_properties::get_filter() const
+{
+    return m_filter;
+}
 
 	inline border_collapse css_properties::get_border_collapse() const
 	{

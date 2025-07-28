@@ -485,6 +485,20 @@ void style::add_property(string_id name, const css_token_vector& value, const st
        case _letter_spacing_:
                return add_length_property(name, val, "normal", f_length, important);
 
+       case _opacity_:
+               if(val.type == NUMBER && val.n.number >= 0 && val.n.number <= 1)
+                       add_parsed_property(name, property_value(val.n.number, important));
+               break;
+
+       case _filter_:
+               if(value.size()==1 && value[0].ident()=="none")
+               {
+                       add_parsed_property(name, property_value(css_token_vector{}, important));
+               } else {
+                       add_parsed_property(name, property_value(value, important));
+               }
+               break;
+
         //  =============================  FLEX  =============================
 
 	case _flex_:

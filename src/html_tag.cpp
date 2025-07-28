@@ -647,17 +647,25 @@ int html_tag::select_pseudoclass(const css_attribute_selector& sel)
 			return select_no_match;
 		}
 		break;
-	case _lang_:
-		if (!get_document()->match_lang(sel.value))
-		{
-			return select_no_match;
-		}
-		break;
-	default:
-		if (!(sel.name in m_pseudo_classes))
-		{
-			return select_no_match;
-		}
+        case _lang_:
+                if (!get_document()->match_lang(sel.value))
+                {
+                        return select_no_match;
+                }
+                break;
+        case _focus_:
+        case _focus_visible_:
+        case _focus_within_:
+                if (!(sel.name in m_pseudo_classes))
+                {
+                        return select_no_match;
+                }
+                break;
+        default:
+                if (!(sel.name in m_pseudo_classes))
+                {
+                        return select_no_match;
+                }
 		break;
 	}
 	return select_match;
@@ -902,7 +910,7 @@ void litehtml::html_tag::draw_background(uint_ptr hdc, int x, int y, const posit
                                                layer.clip_box = *clip;
                                                layer.border_box = *clip;
                                        }
-                                       bg->draw_layer(hdc, i, layer, get_document()->container());
+                                       bg->draw_layer(hdc, i, layer, get_document()->container(), m_css.get_opacity());
                                }
                        }
 
@@ -979,7 +987,7 @@ void litehtml::html_tag::draw_background(uint_ptr hdc, int x, int y, const posit
                                                background_layer layer;
                                                if(!bg->get_layer(i, content_box, this, ri, layer)) continue;
                                                layer.border_radius = bdr.radius.calc_percents(box->width, box->height);
-                                               bg->draw_layer(hdc, i, layer, get_document()->container());
+                                               bg->draw_layer(hdc, i, layer, get_document()->container(), m_css.get_opacity());
                                        }
                                }
                                if(!m_css.get_box_shadow_list().empty())
