@@ -60,7 +60,7 @@ void litehtml::document_container::draw_text_with_shadow(uint_ptr hdc, const cha
                utf8_to_utf32 u32(text);
                for(const char32_t* p = u32; *p; ++p)
                {
-                       string ch = utf32_to_utf8(std::u32string(1, *p));
+                       std::string ch = litehtml::utf32_to_utf8( std::u32string(1, *p).c_str() ).c_str();
                        position cp = pos;
                        cp.x = x;
                        draw_text(hdc, ch.c_str(), hFont, color, cp);
