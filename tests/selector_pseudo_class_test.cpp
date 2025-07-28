@@ -27,3 +27,10 @@ TEST(Selectors, InputPseudoClasses)
     EXPECT_EQ(nullptr, doc2->root()->select_one("input:enabled"));
 }
 
+TEST(Selectors, ColumnCombinatorParse)
+{
+    css_selector sel;
+    ASSERT_TRUE(sel.parse("col||td", litehtml::no_quirks_mode));
+    ASSERT_EQ(combinator_column, sel.m_combinator);
+}
+

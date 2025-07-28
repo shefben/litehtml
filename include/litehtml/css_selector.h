@@ -182,13 +182,14 @@ namespace litehtml
 
 	//////////////////////////////////////////////////////////////////////////
 
-	enum css_combinator
-	{
-		combinator_descendant        = ' ',
-		combinator_child             = '>',
-		combinator_adjacent_sibling  = '+',
-		combinator_general_sibling   = '~'
-	};
+        enum css_combinator
+        {
+                combinator_descendant        = ' ',
+                combinator_child             = '>',
+                combinator_adjacent_sibling  = '+',
+                combinator_general_sibling   = '~',
+                combinator_column            = '|'
+        };
 
 	//////////////////////////////////////////////////////////////////////////
 
