@@ -143,6 +143,27 @@ void test_container::draw_text_with_shadow(uint_ptr hdc, const char* text, uint_
        }
 }
 
+void test_container::draw_box_shadow(uint_ptr hdc, const std::vector<litehtml::box_shadow>& shadow, const position& border_box, const border_radiuses&)
+{
+       canvas* cvs = (canvas*)hdc;
+       for(const auto& sh : shadow)
+       {
+               rect r{border_box.x - (int)sh.spread.val() + (int)sh.offset_x.val(),
+                        border_box.y - (int)sh.spread.val() + (int)sh.offset_y.val(),
+                        border_box.width + (int)sh.spread.val()*2,
+                        border_box.height + (int)sh.spread.val()*2};
+               cvs->set_shadow_color(sh.color.red/255.f, sh.color.green/255.f, sh.color.blue/255.f, sh.color.alpha/255.f);
+               cvs->set_shadow_offset_x((float)sh.offset_x.val());
+               cvs->set_shadow_offset_y((float)sh.offset_y.val());
+               cvs->set_shadow_blur((float)sh.blur.val());
+               fill_rect(*cvs, r, web_color(sh.color.red,sh.color.green,sh.color.blue,sh.color.alpha));
+               cvs->set_shadow_color(0,0,0,0);
+               cvs->set_shadow_blur(0);
+               cvs->set_shadow_offset_x(0);
+               cvs->set_shadow_offset_y(0);
+       }
+}
+
 int test_container::pt_to_px(int pt) const { return pt * 96 / 72; }
 int test_container::get_default_font_size() const { return 16; }
 const char* test_container::get_default_font_name() const { return "Terminus"; }

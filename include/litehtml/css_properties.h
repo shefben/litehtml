@@ -26,13 +26,23 @@ namespace litehtml
 	// CSS Properties types
         using css_line_height_t = css_property<css_length, int>;
 
-       struct text_shadow
-       {
-               web_color   color;
-               css_length  offset_x;
-               css_length  offset_y;
-               css_length  blur;
-       };
+struct text_shadow
+{
+        web_color   color;
+        css_length  offset_x;
+        css_length  offset_y;
+        css_length  blur;
+};
+
+struct box_shadow
+{
+        web_color   color;
+        css_length  offset_x;
+        css_length  offset_y;
+        css_length  blur;
+        css_length  spread;
+        bool        inset = false;
+};
 
 	class css_properties
 	{
@@ -80,6 +90,7 @@ namespace litehtml
 		web_color				m_text_emphasis_color;
 		int						m_text_emphasis_position;
                 std::vector<text_shadow>       m_text_shadow_list;
+                std::vector<box_shadow>        m_box_shadow_list;
                 css_length                              m_letter_spacing;
 		font_metrics			m_font_metrics;
 		text_transform			m_text_transform;
@@ -139,9 +150,10 @@ namespace litehtml
 				m_list_style_type(list_style_type_none),
 				m_list_style_position(list_style_position_outside),
 				m_bg(),
-				m_font(0),
+                               m_font(0),
                                m_font_size(0),
                                m_text_shadow_list(),
+                               m_box_shadow_list(),
                                m_letter_spacing(),
                                m_font_metrics(),
 				m_text_transform(text_transform_none),
@@ -300,10 +312,11 @@ namespace litehtml
 		const css_length& get_text_decoration_thickness() const;
 		const web_color& get_text_decoration_color() const;
 
-		string get_text_emphasis_style() const;
-		web_color get_text_emphasis_color() const;
+               string get_text_emphasis_style() const;
+               web_color get_text_emphasis_color() const;
                int get_text_emphasis_position() const;
                const std::vector<text_shadow>& get_text_shadow_list() const;
+               const std::vector<box_shadow>& get_box_shadow_list() const;
                const css_length& get_letter_spacing() const;
        };
 
@@ -764,6 +777,11 @@ namespace litehtml
        inline const std::vector<text_shadow>& css_properties::get_text_shadow_list() const
        {
                return m_text_shadow_list;
+       }
+
+       inline const std::vector<box_shadow>& css_properties::get_box_shadow_list() const
+       {
+               return m_box_shadow_list;
        }
 
        inline const css_length& css_properties::get_letter_spacing() const

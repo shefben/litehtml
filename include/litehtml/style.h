@@ -23,9 +23,10 @@ namespace litehtml
 		length_vector,
 		float,
                 web_color,
-                vector<image>,
+               vector<image>,
                vector<text_shadow>,
-                string,
+               vector<box_shadow>,
+               string,
 		string_vector,
 		size_vector,
 		css_token_vector
@@ -94,9 +95,10 @@ namespace litehtml
 		void parse_text_decoration_line(const css_token_vector& tokens, bool important);
 
 		void parse_text_emphasis(const css_token_vector& tokens, bool important, document_container* container);
-		bool parse_text_emphasis_color(const css_token& token, bool important, document_container* container);
+               bool parse_text_emphasis_color(const css_token& token, bool important, document_container* container);
                void parse_text_emphasis_position(const css_token_vector& tokens, bool important);
                void parse_text_shadow(const css_token_vector& tokens, bool important, document_container* container);
+               void parse_box_shadow(const css_token_vector& tokens, bool important, document_container* container);
 
 		void parse_flex_flow(const css_token_vector& tokens, bool important);
 		void parse_flex(const css_token_vector& tokens, bool important);

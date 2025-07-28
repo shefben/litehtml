@@ -21,6 +21,7 @@ public:
 	int				text_width(const char* text, uint_ptr hFont) override;
 	void			draw_text(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos) override;
         void                    draw_text_with_shadow(uint_ptr hdc, const char* text, uint_ptr hFont, web_color color, const position& pos, const std::vector<litehtml::text_shadow>& shadow, int letter_spacing, bool rtl) override;
+        void                    draw_box_shadow(uint_ptr hdc, const std::vector<litehtml::box_shadow>& shadow, const position& border_box, const border_radiuses& border_radius) override;
 	int				pt_to_px(int pt) const override;
 	int				get_default_font_size() const override;
 	const char*		get_default_font_name() const override;

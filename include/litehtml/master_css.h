@@ -338,6 +338,7 @@ input, textarea, keygen, select, button, isindex {
         text-indent: 0;
         letter-spacing: normal;
         text-shadow: none;
+        box-shadow: none;
         display: inline-block;
 }
 input[type="hidden"] {
