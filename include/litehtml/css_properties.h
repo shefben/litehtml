@@ -122,7 +122,13 @@ struct box_shadow
                 int                                     m_grid_column_start;
                 int                                     m_grid_column_end;
                 int                                     m_grid_row_start;
-                int                                     m_grid_row_end;
+               int                                     m_grid_row_end;
+
+               table_layout                    m_table_layout;
+               page_break                      m_page_break_before;
+               page_break                      m_page_break_after;
+               int                                     m_orphans;
+               int                                     m_widows;
 
 	private:
 		void compute_font(const html_tag* el, const std::shared_ptr<document>& doc);
@@ -183,11 +189,16 @@ struct box_shadow
                                 m_grid_template_rows(),
                                 m_grid_column_gap(),
                                 m_grid_row_gap(),
-                                m_grid_column_start(1),
-                                m_grid_column_end(2),
-                                m_grid_row_start(1),
-                                m_grid_row_end(2)
-		{}
+                               m_grid_column_start(1),
+                               m_grid_column_end(2),
+                               m_grid_row_start(1),
+                               m_grid_row_end(2),
+                               m_table_layout(table_layout_auto),
+                               m_page_break_before(page_break_auto),
+                               m_page_break_after(page_break_auto),
+                               m_orphans(2),
+                               m_widows(2)
+                {}
 
 		void compute(const html_tag* el, const std::shared_ptr<document>& doc);
 		std::vector<std::tuple<string, string>> dump_get_attrs();
@@ -333,6 +344,12 @@ struct box_shadow
                int get_grid_column_end() const;
                int get_grid_row_start() const;
                int get_grid_row_end() const;
+
+               table_layout get_table_layout() const;
+               page_break get_page_break_before() const;
+               page_break get_page_break_after() const;
+               int get_orphans() const;
+               int get_widows() const;
 
 		int get_text_decoration_line() const;
 		text_decoration_style get_text_decoration_style() const;
@@ -847,6 +864,31 @@ inline int css_properties::get_grid_row_start() const
 inline int css_properties::get_grid_row_end() const
 {
     return m_grid_row_end;
+}
+
+inline table_layout css_properties::get_table_layout() const
+{
+    return m_table_layout;
+}
+
+inline page_break css_properties::get_page_break_before() const
+{
+    return m_page_break_before;
+}
+
+inline page_break css_properties::get_page_break_after() const
+{
+    return m_page_break_after;
+}
+
+inline int css_properties::get_orphans() const
+{
+    return m_orphans;
+}
+
+inline int css_properties::get_widows() const
+{
+    return m_widows;
 }
 }
 

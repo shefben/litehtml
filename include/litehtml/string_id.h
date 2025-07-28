@@ -329,6 +329,12 @@ STRING_ID(
         _grid_column_,
         _grid_row_,
 
+        _table_layout_,
+        _page_break_before_,
+        _page_break_after_,
+        _orphans_,
+        _widows_,
+
         _counter_reset_,
         _counter_increment_,
 

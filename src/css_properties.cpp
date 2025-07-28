@@ -576,6 +576,12 @@ void litehtml::css_properties::compute_grid(const html_tag* el, const document::
         m_grid_column_end   = el->get_property<int>(_grid_column_end_,   false, m_grid_column_start + 1, offset(m_grid_column_end));
         m_grid_row_start    = el->get_property<int>(_grid_row_start_,    false, 1, offset(m_grid_row_start));
         m_grid_row_end      = el->get_property<int>(_grid_row_end_,      false, m_grid_row_start + 1, offset(m_grid_row_end));
+
+        m_table_layout      = (table_layout) el->get_property<int>(_table_layout_, true, table_layout_auto, offset(m_table_layout));
+        m_page_break_before = (page_break)  el->get_property<int>(_page_break_before_, true, page_break_auto, offset(m_page_break_before));
+        m_page_break_after  = (page_break)  el->get_property<int>(_page_break_after_,  true, page_break_auto, offset(m_page_break_after));
+        m_orphans           = el->get_property<int>(_orphans_, true, 2, offset(m_orphans));
+        m_widows            = el->get_property<int>(_widows_,  true, 2, offset(m_widows));
 }
 
 std::vector<std::tuple<litehtml::string, litehtml::string>> litehtml::css_properties::dump_get_attrs()
