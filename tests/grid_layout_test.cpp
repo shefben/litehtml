@@ -8,7 +8,7 @@ TEST(Grid, BasicPlacement)
 {
     simple_container tc;
     auto doc = document::createFromString(
-        "<div id='c' style='display:grid;grid-template-columns:100px 100px;grid-template-rows:50px 50px;grid-column-gap:10px;grid-row-gap:5px'>"
+        "<div id='c' style='display:grid;grid-template-columns:100px 100px;grid-template-rows:50px 50px;grid-column-gap:10px;grid-row-gap:5px;margin:0'>"
         "<div id='a' style='grid-column:1/2;grid-row:1/2;width:50px;height:30px'></div>"
         "<div id='b' style='grid-column:2/3;grid-row:1/3;width:50px;height:40px'></div>"
         "</div>", &tc);
