@@ -65,7 +65,10 @@ std::map<string_id, string> style::m_valid_values =
 	{ _align_items_, flex_align_items_strings },
 	{ _align_self_, flex_align_items_strings },
 
-	{ _caption_side_, caption_side_strings },
+        { _caption_side_, caption_side_strings },
+
+        { _column_fill_, column_fill_strings },
+        { _column_rule_style_, border_style_strings },
 
 	{ _text_decoration_style_, style_text_decoration_style_strings },
 	{ _text_emphasis_position_, style_text_emphasis_position_strings },
@@ -504,10 +507,44 @@ void style::add_property(string_id name, const css_token_vector& value, const st
 		parse_align_self(name, value, important);
 		break;
 
-	case _order_: // <integer>
-		if (val.type == NUMBER && val.n.number_type == css_number_integer)
-			add_parsed_property(name, property_value((int)val.n.number, important));
-		break;
+        case _order_: // <integer>
+                if (val.type == NUMBER && val.n.number_type == css_number_integer)
+                        add_parsed_property(name, property_value((int)val.n.number, important));
+                break;
+
+        case _column_count_:
+                add_length_property(name, val, "auto", f_integer, important);
+                break;
+
+        case _column_gap_:
+                add_length_property(name, val, "normal", f_length, important);
+                break;
+
+        case _column_width_:
+                add_length_property(name, val, "auto", f_length, important);
+                break;
+
+        case _column_fill_:
+                if (int index = value_index(ident, column_fill_strings); index >= 0)
+                        add_parsed_property(name, property_value(index, important));
+                break;
+
+        case _column_rule_width_:
+                add_length_property(name, val, "medium", f_length, important);
+                break;
+
+        case _column_rule_style_:
+                if (int index = value_index(ident, border_style_strings); index >= 0)
+                        add_parsed_property(name, property_value(index, important));
+                break;
+
+        case _column_rule_color_:
+        {
+                web_color color;
+                if (parse_color(val, color, container))
+                        add_parsed_property(name, property_value(color, important));
+        }
+                break;
 
 	//  =============================  COUNTER, CONTENT  =============================
 

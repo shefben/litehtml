@@ -114,6 +114,14 @@ struct box_shadow
 		caption_side			m_caption_side;
 
 		int 					m_order;
+                css_length                              m_column_count;
+                css_length                              m_column_gap;
+                css_length                              m_column_width;
+                column_fill                             m_column_fill;
+                css_length                              m_column_rule_width;
+                border_style                            m_column_rule_style;
+                web_color                               m_column_rule_color;
+
 
 	private:
 		void compute_font(const html_tag* el, const std::shared_ptr<document>& doc);
@@ -168,7 +176,14 @@ struct box_shadow
 				m_flex_align_items(flex_align_items_stretch),
 				m_flex_align_self(flex_align_items_auto),
 				m_flex_align_content(flex_align_content_stretch),
-				m_order(0)
+				m_order(0),
+                                m_column_count(),
+                                m_column_gap(),
+                                m_column_width(),
+                                m_column_fill(column_fill_balance),
+                                m_column_rule_width(),
+                                m_column_rule_style(border_style_none),
+                                m_column_rule_color(web_color::transparent)
 		{}
 
 		void compute(const html_tag* el, const std::shared_ptr<document>& doc);
@@ -318,6 +333,14 @@ struct box_shadow
                const std::vector<text_shadow>& get_text_shadow_list() const;
                const std::vector<box_shadow>& get_box_shadow_list() const;
                const css_length& get_letter_spacing() const;
+
+               const css_length& get_column_count() const;
+               const css_length& get_column_gap() const;
+               const css_length& get_column_width() const;
+               column_fill get_column_fill() const;
+               const css_length& get_column_rule_width() const;
+               border_style get_column_rule_style() const;
+               const web_color& get_column_rule_color() const;
        };
 
 	inline element_position css_properties::get_position() const
@@ -787,6 +810,41 @@ struct box_shadow
        inline const css_length& css_properties::get_letter_spacing() const
        {
                return m_letter_spacing;
+       }
+
+       inline const css_length& css_properties::get_column_count() const
+       {
+               return m_column_count;
+       }
+
+       inline const css_length& css_properties::get_column_gap() const
+       {
+               return m_column_gap;
+       }
+
+       inline const css_length& css_properties::get_column_width() const
+       {
+               return m_column_width;
+       }
+
+       inline column_fill css_properties::get_column_fill() const
+       {
+               return m_column_fill;
+       }
+
+       inline const css_length& css_properties::get_column_rule_width() const
+       {
+               return m_column_rule_width;
+       }
+
+       inline border_style css_properties::get_column_rule_style() const
+       {
+               return m_column_rule_style;
+       }
+
+       inline const web_color& css_properties::get_column_rule_color() const
+       {
+               return m_column_rule_color;
        }
 }
 

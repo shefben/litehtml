@@ -1,6 +1,7 @@
 #include "render_block.h"
 #include "render_inline_context.h"
 #include "render_block_context.h"
+#include "render_multi_column.h"
 #include "document.h"
 #include "document_container.h"
 #include "html_tag.h"
@@ -116,7 +117,12 @@ std::shared_ptr<litehtml::render_item> litehtml::render_item_block::init()
     }
     if(has_block_level)
     {
-        ret = std::make_shared<render_item_block_context>(src_el());
+        if(!src_el()->css().get_column_count().is_predefined() || !src_el()->css().get_column_width().is_predefined())
+        {
+            ret = std::make_shared<render_item_multi_column>(src_el());
+        } else {
+            ret = std::make_shared<render_item_block_context>(src_el());
+        }
         ret->parent(parent());
 
         auto doc = src_el()->get_document();

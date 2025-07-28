@@ -68,9 +68,10 @@ set(SOURCE_LITEHTML
 	src/line_box.cpp
 	src/css_borders.cpp
 	src/render_item.cpp
-	src/render_block_context.cpp
-	src/render_block.cpp
-	src/render_inline_context.cpp
+        src/render_block_context.cpp
+        src/render_block.cpp
+        src/render_multi_column.cpp
+        src/render_inline_context.cpp
 	src/render_table.cpp
 	src/render_flex.cpp
 	src/render_image.cpp

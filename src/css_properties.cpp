@@ -249,7 +249,15 @@ void litehtml::css_properties::compute(const html_tag* el, const document::ptr& 
 		doc->container()->load_image(m_list_style_image.c_str(), m_list_style_image_baseurl.c_str(), true);
 	}
 
-	m_order = el->get_property<int>(_order_, false, 0, offset(m_order));
+        m_order = el->get_property<int>(_order_, false, 0, offset(m_order));
+
+        m_column_count      = el->get_property<css_length>(_column_count_, false, _auto, offset(m_column_count));
+        m_column_gap        = el->get_property<css_length>(_column_gap_, true, 0, offset(m_column_gap));
+        m_column_width      = el->get_property<css_length>(_column_width_, false, _auto, offset(m_column_width));
+        m_column_fill       = (column_fill)el->get_property<int>(_column_fill_, true, column_fill_balance, offset(m_column_fill));
+        m_column_rule_width = el->get_property<css_length>(_column_rule_width_, true, 0, offset(m_column_rule_width));
+        m_column_rule_style = (border_style)el->get_property<int>(_column_rule_style_, true, border_style_none, offset(m_column_rule_style));
+        m_column_rule_color = get_color_property(el, _column_rule_color_, true, web_color::transparent, offset(m_column_rule_color));
 
 	compute_background(el, doc);
 	compute_flex(el, doc);

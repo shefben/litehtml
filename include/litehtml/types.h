@@ -1046,6 +1046,14 @@ namespace litehtml
 		flex_basis_max_content,
 	};
 
+#define column_fill_strings             "balance;auto"
+
+        enum column_fill
+        {
+                column_fill_balance,
+                column_fill_auto
+        };
+
 #define caption_side_strings		"top;bottom"
 
 	enum caption_side

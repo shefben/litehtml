@@ -315,11 +315,19 @@ STRING_ID(
 	_flex_shrink_,
 	_flex_basis_,
 
-	_caption_side_,
-	_order_,
+        _caption_side_,
+        _order_,
 
-	_counter_reset_,
-	_counter_increment_,
+        _column_count_,
+        _column_gap_,
+        _column_width_,
+        _column_fill_,
+        _column_rule_width_,
+        _column_rule_style_,
+        _column_rule_color_,
+
+        _counter_reset_,
+        _counter_increment_,
 
 	// some CSS dimensions
 	_deg_,
