@@ -1050,11 +1050,30 @@ namespace litehtml
 
 #define caption_side_strings		"top;bottom"
 
-	enum caption_side
-	{
-		caption_side_top,
-		caption_side_bottom
-	};
+        enum caption_side
+        {
+                caption_side_top,
+                caption_side_bottom
+        };
+
+#define page_break_strings             "auto;always;avoid;left;right"
+
+       enum page_break
+       {
+               page_break_auto,
+               page_break_always,
+               page_break_avoid,
+               page_break_left,
+               page_break_right
+       };
+
+#define table_layout_strings           "auto;fixed"
+
+       enum table_layout
+       {
+               table_layout_auto,
+               table_layout_fixed
+       };
 }
 
 #endif  // LH_TYPES_H
