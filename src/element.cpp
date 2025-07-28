@@ -3,6 +3,7 @@
 #include "document.h"
 #include "render_item.h"
 #include "render_flex.h"
+#include "render_grid.h"
 #include "render_inline.h"
 #include "render_table.h"
 #include "el_before_after.h"
@@ -155,10 +156,13 @@ std::shared_ptr<render_item> element::create_render_item(const std::shared_ptr<r
 	} else if(css().get_display() == display_inline || css().get_display() == display_inline_text)
 	{
 		ret = std::make_shared<render_item_inline>(shared_from_this());
-	} else if(css().get_display() == display_flex || css().get_display() == display_inline_flex)
-	{
-		ret = std::make_shared<render_item_flex>(shared_from_this());
-	}
+       } else if(css().get_display() == display_flex || css().get_display() == display_inline_flex)
+       {
+               ret = std::make_shared<render_item_flex>(shared_from_this());
+       } else if(css().get_display() == display_grid || css().get_display() == display_inline_grid)
+       {
+               ret = std::make_shared<render_item_grid>(shared_from_this());
+       }
 	if(ret)
 	{
 		if (css().get_display() == display_table ||
